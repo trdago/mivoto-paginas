@@ -4,7 +4,6 @@
 
 export const LATIDO_MS = 2000;
 const PAGINA = 100; // bloques por pedido al sincronizar
-const MAX_FEED = 30;
 const LOTE = 128 * 1024; // bytes por verificación: los bloques pesados avisan su avance
 
 const ETIQUETAS = {
@@ -43,19 +42,18 @@ export function duracion(ms) {
   return `${m}:${dos(s % 60)}`;
 }
 
+const CIFRAS = {
+  secreto: [['Credencial emitida', 'Credenciales emitidas'], ['Voto anónimo', 'Votos anónimos']],
+  urfa: [['Participante', 'Participantes'], ['Toque', 'Toques']],
+};
+
 /** participacion son las cifras que se ven en vivo, también en una votación secreta abierta. */
 export function participacion(vista) {
-  if (vista.mode === 'secreto') {
-    return [
-      { etiqueta: 'Credenciales emitidas', valor: vista.voters },
-      { etiqueta: 'Votos anónimos', valor: vista.ballots },
-    ];
-  }
-  return [
-    { etiqueta: 'Participantes', valor: vista.voters },
-    { etiqueta: 'Toques', valor: vista.ballots },
-  ];
+  const [personas, votos] = CIFRAS[vista.mode] ?? CIFRAS.urfa;
+  return [cifra(personas, vista.voters), cifra(votos, vista.ballots)];
 }
+
+const cifra = ([uno, varios], valor) => ({ etiqueta: valor === 1 ? uno : varios, valor });
 
 /** filasResultado es el resultado por opción; vacío mientras la votación secreta sigue abierta. */
 export function filasResultado(vista) {
@@ -67,7 +65,7 @@ export function filasResultado(vista) {
   });
 }
 
-/** porBloque parte una respuesta de /v1/blocks en cuerpos de un bloque, como los pide votocore.inspect. */
+/** porBloque parte una respuesta de /v1/blocks en cuerpos de un bloque, para verificarlos por lotes. */
 export function porBloque(bytes) {
   const { blocks = [] } = JSON.parse(new TextDecoder().decode(bytes));
   return blocks.map((b) => new TextEncoder().encode(JSON.stringify({ blocks: [b] })));
@@ -96,59 +94,92 @@ function unir(bloques) {
 
 /** foto es lo que la página dibuja: datos sueltos, que pasan del Web Worker a la página. */
 export function foto(o) {
-  const { altura, vista, feed, nodoEstado, nodoDistinto, validadores } = o;
-  return { altura, vista, feed, nodoEstado, nodoDistinto, validadores };
+  const { altura, eleccion, elecciones, vista, feed, nodoEstado, nodoDistinto, validadores } = o;
+  return { altura, eleccion, elecciones, vista, feed, nodoEstado, nodoDistinto, validadores };
 }
 
-/** filaDeBloque resume un bloque verificado para la lista en vivo. */
-export function filaDeBloque(b) {
-  const propias = b.txs.filter((t) => t.mine);
+/** listado separa las votaciones para la portada: primero lo que cierra o empieza antes, o lo que cerró último. */
+export function listado(elecciones, ahora) {
+  const por = (campo, sentido) => (a, b) => sentido * (a[campo] - b[campo]);
+  const vigentes = elecciones.filter((v) => !v.closed);
+  return {
+    enCurso: vigentes.filter((v) => ahora >= v.starts_at).sort(por('ends_at', 1)),
+    porEmpezar: vigentes.filter((v) => ahora < v.starts_at).sort(por('starts_at', 1)),
+    cerradas: elecciones.filter((v) => v.closed).sort(por('ends_at', -1)),
+  };
+}
+
+/** cierre dice en una línea cómo terminó una votación; vacío si no ha cerrado. */
+export function cierre(vista) {
+  if (!vista.closed) return '';
+  if (vista.winner >= 0) return `Ganó «${vista.options[vista.winner]}»`;
+  return vista.ballots > 0 ? 'Empate' : 'Sin votos';
+}
+
+/**
+ * filaDeBloque resume un bloque verificado para la lista: en la portada nombra la votación de cada cosa; al mirar
+ * una, muestra solo lo suyo. `txs` es null si votocore no dice cuántas trae (hay una votación secreta abierta).
+ */
+export function filaDeBloque(b, eleccion) {
+  const eventos = b.events.filter((e) => !eleccion || e.election === eleccion);
   return {
     altura: b.height,
     hash: b.hash,
     hora: b.time,
-    txs: b.tx_count,
-    firmas: b.signers.length,
-    propias: propias.length,
-    detalle: resumen(propias),
+    txs: b.txs < 0 ? null : b.txs,
+    firmas: b.signers,
+    propias: b.mine,
+    detalle: eventos.map((e) => evento(e, eleccion)).join(' · '),
   };
 }
 
-function resumen(txs) {
-  const cuenta = new Map();
-  for (const t of txs) cuenta.set(etiqueta(t.kind), (cuenta.get(etiqueta(t.kind)) ?? 0) + 1);
-  return [...cuenta].map(([e, n]) => (n > 1 ? `${n} × ${e}` : e)).join(' · ');
+function evento(e, eleccion) {
+  const veces = e.n > 1 ? `${e.n} × ` : '';
+  const titulo = e.title && !eleccion ? ` «${e.title}»` : '';
+  return veces + etiqueta(e.kind) + titulo;
 }
 
 /**
- * Observador sigue una votación: sincroniza la cadena desde el bloque 1 verificando cada uno,
- * y luego, en cada latido, baja solo los bloques nuevos. Solo hace GET al nodo.
+ * Observador sigue la cadena: la sincroniza desde el bloque 1 verificando cada uno y luego, en cada latido, baja
+ * solo los bloques nuevos. Mira una votación o todas (eleccion null). Solo hace GET al nodo.
  */
 export class Observador {
-  constructor({ nodo, validadores, eleccion, votocore, fetch, alCambiar = () => {} }) {
-    Object.assign(this, { nodo, validadores, eleccion, votocore, fetch, alCambiar });
+  constructor({ nodo, validadores, eleccion = null, votocore, fetch }) {
+    Object.assign(this, { nodo, validadores, eleccion, votocore, fetch });
     this.altura = 0;
-    this.vista = null;
+    this.elecciones = [];
     this.feed = [];
     this.nodoEstado = null;
-    this.error = null;
+  }
+
+  /** vista es la votación que se mira; null en la portada o si no está en la cadena. */
+  get vista() {
+    return this.elecciones.find((v) => v.id === this.eleccion) ?? null;
   }
 
   async iniciar(progreso = () => {}) {
     falla(this.votocore.open(this.validadores.join(',')));
     await this.leerEstado();
-    await this.sincronizar(progreso, false);
-    this.actualizarVista();
-    await this.cargarRastro();
-    this.alCambiar(this);
+    await this.sincronizar(progreso);
+    this.actualizar();
   }
 
   async latido() {
     await this.leerEstado();
     if (this.nodoEstado.height <= this.altura) return;
-    await this.sincronizar(() => {}, true);
-    this.actualizarVista();
-    this.alCambiar(this);
+    await this.sincronizar(() => {});
+    this.actualizar();
+  }
+
+  /** mirar cambia de votación (null: todas) con lo ya verificado. */
+  mirar(eleccion) {
+    this.eleccion = eleccion;
+    this.actualizar();
+  }
+
+  actualizar() {
+    this.elecciones = JSON.parse(falla(this.votocore.elections()).json);
+    this.feed = JSON.parse(falla(this.votocore.feed(this.eleccion ?? '')).json).map((b) => filaDeBloque(b, this.eleccion));
   }
 
   async leerEstado() {
@@ -156,35 +187,19 @@ export class Observador {
     this.nodoDistinto = this.nodoEstado.validators.join(',') !== this.validadores.join(',');
   }
 
-  async sincronizar(progreso, enVivo) {
+  async sincronizar(progreso) {
     for (;;) {
       const bytes = new Uint8Array(await (await this.leer(`/v1/blocks?from=${this.altura + 1}&limit=${PAGINA}`)).arrayBuffer());
       const bloques = porBloque(bytes);
       if (bloques.length === 0) return;
-      for (const lote of lotes(bloques)) {
-        this.altura = falla(this.votocore.apply(unir(lote))).height;
-        progreso(this.altura, this.nodoEstado.height);
-      }
-      if (enVivo) bloques.forEach((b) => this.alFeed(b));
+      for (const lote of lotes(bloques)) this.aplicar(lote, progreso);
     }
   }
 
-  actualizarVista() {
-    const r = this.votocore.live(this.eleccion);
-    this.vista = r.error ? null : JSON.parse(r.json);
-  }
-
-  async cargarRastro() {
-    for (const h of this.vista?.trail ?? []) {
-      const bytes = new Uint8Array(await (await this.leer(`/v1/blocks?from=${h}&limit=1`)).arrayBuffer());
-      porBloque(bytes).forEach((b) => this.alFeed(b));
-    }
-  }
-
-  alFeed(cuerpo) {
-    const r = falla(this.votocore.inspect(cuerpo, this.eleccion, Boolean(this.vista?.closed)));
-    this.feed.unshift(filaDeBloque(JSON.parse(r.json)));
-    this.feed.length = Math.min(this.feed.length, MAX_FEED);
+  aplicar(lote, progreso) {
+    const { height, txs } = falla(this.votocore.apply(unir(lote)));
+    this.altura = height;
+    progreso({ altura: height, alto: this.nodoEstado.height, txs });
   }
 
   async leer(ruta) {
