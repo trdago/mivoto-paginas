@@ -135,10 +135,12 @@ function tituloDe(o) {
 
 /** dibujarTodo es el botón de verificar toda la cadena y cuánto le falta. */
 function dibujarTodo({ todo, altura }) {
-  $('verificar-todo').hidden = todo.pedida;
-  $('todo-avance').hidden = !todo.faltan;
-  if (!todo.faltan) return;
-  $('todo-texto').textContent = `Revisando las firmas de toda la cadena: faltan ${miles(todo.faltan)} de ${miles(altura)} bloques.`;
+  const trabajando = todo.pedida && todo.faltan > 0;
+  $('todo-pedir').hidden = todo.pedida || todo.faltan === 0;
+  $('todo-avance').hidden = !trabajando;
+  $('verificar-todo').textContent = todo.faltan > 0 ? `Seguir verificando (faltan ${miles(todo.faltan)} bloques)` : 'Verificar toda la cadena';
+  if (!trabajando) return;
+  $('todo-texto').textContent = `Tu aparato está revisando las firmas de toda la cadena: faltan ${miles(todo.faltan)} de ${miles(altura)} bloques.`;
   $('todo-barra').value = 1 - todo.faltan / altura;
 }
 
@@ -210,6 +212,7 @@ function seguir() {
   enviar({ tipo: 'seguir', datos });
   document.addEventListener('visibilitychange', () => enviar({ tipo: 'visible' }));
   $('verificar-todo').addEventListener('click', () => enviar({ tipo: 'todo' }));
+  $('detener-todo').addEventListener('click', () => enviar({ tipo: 'detener' }));
   window.addEventListener('hashchange', () => enviar({ tipo: 'ver', eleccion: eleccionDe(location.hash) }));
 }
 
