@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="referrer" content="no-referrer">
+<title>Privacidad · Mi Voto</title>
+<!-- Se publica con deploy/play/publicar-paginas en mivoto.fairplay-chile.cl. Con un marcador de llaves dobles sin llenar no se publica. -->
+<style>
+  :root { color-scheme: light; --marca: #1D46C8; --fondo: #F3F5F9; --superficie: #FFFFFF; --texto: #0E1A33; --secundario: #56617A; }
+  * { box-sizing: border-box; }
+  body { margin: 0; padding: 24px 16px; background: var(--fondo); color: var(--texto);
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; line-height: 1.6; }
+  main { max-width: 680px; margin: 0 auto; background: var(--superficie); border-radius: 16px; padding: 24px; }
+  .marca { color: var(--marca); font-weight: 800; margin: 0 0 16px; }
+  h1 { font-size: 24px; line-height: 1.3; margin: 0 0 4px; }
+  h2 { font-size: 18px; color: var(--marca); margin: 24px 0 8px; }
+  p, li { overflow-wrap: anywhere; }
+  p { margin: 0 0 8px; }
+  ul { margin: 0 0 8px; padding-left: 20px; }
+  .fecha { font-size: 14px; color: var(--secundario); }
+  a { color: var(--marca); }
+</style>
+</head>
+<body>
+<main>
+  <p class="marca">Mi Voto</p>
+  <h1>Política de privacidad</h1>
+  <p class="fecha">Vigente desde el 24 de noviembre de 2026.</p>
+  <p>Mi Voto permite crear votaciones en grupo, votar en secreto y jugar votaciones rápidas (URFA). Cada votación queda
+    registrada en VotoChain, una cadena de bloques privada que opera Fair Play, en Chile, que responde por tus datos.
+    Para cualquier consulta escribe a <a href="mailto:dpailahueque@fairplay-chile.cl">dpailahueque@fairplay-chile.cl</a>.</p>
+
+  <h2>Sin cuentas ni datos personales</h2>
+  <ul>
+    <li>No pedimos nombre, correo, teléfono, RUT ni ubicación. No hay cuentas, publicidad ni analítica de terceros.</li>
+    <li>Al abrir la app por primera vez, tu teléfono crea una clave dentro de su chip seguro. La clave privada nunca sale
+      del teléfono. Su parte pública, y un código derivado de ella (el identificador del dispositivo), quedan en
+      VotoChain.</li>
+    <li>La huella o el PIN los verifica Android. Mi Voto solo recibe la respuesta «desbloqueado»; nunca ve ni guarda tu
+      huella.</li>
+  </ul>
+
+  <h2>Qué queda en VotoChain</h2>
+  <ul>
+    <li>El registro de tu dispositivo (su clave pública).</li>
+    <li>Las votaciones que creas: pregunta, opciones, modalidad y horario.</li>
+    <li>En una votación secreta, que tu dispositivo participó. <strong>Tu voto queda separado de tu dispositivo</strong>
+      mediante firmas ciegas: nadie, ni siquiera Fair Play, puede saber qué votaste.</li>
+    <li>En una votación URFA (juego), cada toque, con el identificador de tu dispositivo. Son públicos a propósito: así se
+      arma el ranking.</li>
+  </ul>
+  <p>VotoChain no se puede modificar ni borrar: esa es la garantía de que nadie altera un resultado. Por eso lo que ya
+    quedó en la cadena no se puede eliminar. No contiene datos que te identifiquen por sí solos.</p>
+
+  <h2>Qué guarda tu teléfono</h2>
+  <ul>
+    <li>Las votaciones que abriste o creaste, si ya votaste en ellas y tu recibo (número de bloque).</li>
+    <li>Al desinstalar la app se borran estos datos y la clave del dispositivo. Una instalación nueva es un dispositivo
+      nuevo.</li>
+  </ul>
+
+  <h2>Cómo viaja y quién lo ve</h2>
+  <ul>
+    <li>La app habla solo con los nodos de VotoChain por HTTPS, a través de Cloudflare.</li>
+    <li>Los servidores no guardan registro de las direcciones IP de quienes votan.</li>
+    <li>Cualquier persona puede auditar la cadena desde la app. Lo que ve es lo descrito arriba: claves públicas,
+      votaciones, participaciones, votos secretos sin dueño y toques URFA.</li>
+    <li>No vendemos ni compartimos datos con terceros.</li>
+  </ul>
+
+  <h2>Menores de edad</h2>
+  <p>Mi Voto no está dirigida a menores de 13 años.</p>
+
+  <h2>Cambios</h2>
+  <p>Si esta política cambia, publicaremos la versión nueva en esta misma dirección con su fecha.</p>
+</main>
+</body>
+</html>
