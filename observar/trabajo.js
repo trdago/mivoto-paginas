@@ -1,53 +1,111 @@
 // Trabajo del observador fuera del hilo de la página (lo corre trabajador.js): verifica, sigue en vivo y
 // avisa lo que hay que dibujar. Sin DOM ni globales del navegador, para probarlo en node (observar_test.mjs).
-import { LATIDO_MS, Observador, foto } from './nucleo.js';
+import { ErrorDeVerificacion, LATIDO_MS, Observador, foto } from './nucleo.js';
 
 const pausa = (ms) => new Promise((r) => setTimeout(() => r(true), ms));
 
 /**
- * trabajo devuelve `seguir()`, que sincroniza y sigue la cadena, y `ver(eleccion)`, que cambia de votación (null:
- * todas) sin volver a verificar. Avisa `avance`, `vista`, `corte` (sin conexión, se reintenta) o `falla` (no se pudo
- * verificar). `visible` dice si la pestaña se ve: oculta no consulta al nodo. `dormir` en falso termina.
+ * trabajo devuelve `seguir()`, que abre y sigue la cadena; `ver(eleccion)`, que cambia de votación (null: todas) y
+ * revisa las firmas de esa; `verificarTodo()`, que revisa las de toda la cadena; y `revisado()`, que espera a que no
+ * quede nada por revisar. Avisa `avance`, `vista`, `corte` (sin conexión, se reintenta) o `falla` (no verifica).
+ * `visible` dice si la pestaña se ve: oculta no consulta al nodo ni revisa. `dormir` en falso termina.
  */
-export function trabajo({ datos, avisar, cargarVotocore, fetch, visible, dormir = pausa }) {
+export function trabajo({ datos, avisar, cargarVotocore, fetch, visible, dormir = pausa, respirar = () => pausa(0) }) {
   let { eleccion } = datos;
   let listo = null;
-  const mostrar = (o) => avisar({ tipo: 'vista', foto: foto(o) });
+  let roto = false;
+  let revision = null;
+  const todo = { pedida: false, faltan: null };
 
-  async function verificar() {
+  function mostrar() {
+    if (!roto) avisar({ tipo: 'vista', foto: { ...foto(listo), todo: { ...todo } } });
+  }
+
+  /** tropezar: lo que no verifica detiene la página; un corte de red se reintenta en el próximo latido. */
+  function tropezar(e) {
+    if (!(e instanceof ErrorDeVerificacion)) return avisar({ tipo: 'corte', texto: e.message });
+    roto = true;
+    return romper(e);
+  }
+
+  function romper(e) {
+    avisar({ tipo: 'falla', texto: `No se pudo verificar la cadena: ${e.message}` });
+  }
+
+  async function abrir() {
     const o = new Observador({ ...datos, votocore: await cargarVotocore(), fetch });
     await o.iniciar((avance) => avisar({ tipo: 'avance', ...avance }));
+    o.mirar(eleccion);
     return o;
   }
 
   async function latir() {
     try {
       await listo.latido();
-      mostrar(listo);
+      mostrar();
+      revisar();
     } catch (e) {
-      avisar({ tipo: 'corte', texto: e.message });
+      tropezar(e);
     }
+  }
+
+  /** objetivo es lo que toca revisar: la votación que se mira, toda la cadena (null) si se pidió, o nada. */
+  function objetivo() {
+    if (!visible()) return undefined;
+    if (eleccion && listo.faltan(eleccion).length > 0) return eleccion;
+    if (todo.pedida && todo.faltan > 0) return null;
+    return undefined;
+  }
+
+  /** revisar pone a revisar firmas si no se está en eso. */
+  function revisar() {
+    if (todo.pedida) todo.faltan = listo.faltan(null).length;
+    revision ??= revisarObjetivos().catch(tropezar).finally(() => { revision = null; });
+  }
+
+  async function revisarObjetivos() {
+    for (let actual = objetivo(); actual !== undefined; actual = objetivo()) {
+      const sigue = () => objetivo() === actual;
+      await listo.revisar(actual, { alAvanzar: refrescar, sigue });
+    }
+  }
+
+  async function refrescar() {
+    if (todo.pedida) todo.faltan = listo.faltan(null).length;
+    listo.actualizar();
+    mostrar();
+    await respirar();
   }
 
   return {
     async seguir() {
       try {
-        listo = await verificar();
-        listo.mirar(eleccion);
-        mostrar(listo);
+        listo = await abrir();
       } catch (e) {
-        avisar({ tipo: 'falla', texto: `No se pudo verificar la cadena: ${e.message}` });
-        return;
+        return romper(e);
       }
-      while (await dormir(LATIDO_MS)) {
+      mostrar();
+      revisar();
+      while (!roto && await dormir(LATIDO_MS)) {
         if (visible()) await latir();
       }
+      return undefined;
     },
     ver(pedida) {
       eleccion = pedida;
-      if (!listo) return;
+      if (!listo || roto) return;
       listo.mirar(pedida);
-      mostrar(listo);
+      mostrar();
+      revisar();
+    },
+    verificarTodo() {
+      if (!listo || roto) return;
+      todo.pedida = true;
+      revisar();
+      mostrar();
+    },
+    async revisado() {
+      while (revision) await revision;
     },
   };
 }
