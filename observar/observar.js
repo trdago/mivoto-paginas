@@ -1,6 +1,6 @@
-// Interfaz del observador: carga votocore (WebAssembly), sigue la votación con nucleo.js y dibuja.
+// Interfaz del observador: dibuja lo que verifica el Web Worker (trabajador.js).
 // Todo texto que viene de la cadena (título, opciones) entra con textContent, nunca como HTML.
-import { LATIDO_MS, Observador, eleccionDe, estadoDe, filasResultado, participacion } from './nucleo.js';
+import { eleccionDe, estadoDe, filasResultado, participacion } from './nucleo.js';
 
 const $ = (id) => document.getElementById(id);
 const meta = (nombre) => document.querySelector(`meta[name="${nombre}"]`).content;
@@ -19,14 +19,6 @@ function fallar(texto) {
   $('carga').hidden = true;
   $('falla').hidden = false;
   $('falla-texto').textContent = texto;
-}
-
-async function cargarVotocore() {
-  const go = new Go();
-  const r = await fetch('votocore.wasm');
-  const { instance } = await WebAssembly.instantiate(await r.arrayBuffer(), go.importObject);
-  go.run(instance);
-  return globalThis.votocore;
 }
 
 function dibujarCifras(vista) {
@@ -93,42 +85,47 @@ function dibujar(o, nuevas = new Set()) {
   dibujarFeed(o, nuevas);
 }
 
-async function vivir(o) {
-  for (;;) {
-    await new Promise((r) => setTimeout(r, LATIDO_MS));
-    if (document.hidden) continue; // pestaña oculta: no consulta al nodo
-    const antes = new Set(o.feed.map((f) => f.altura));
-    try {
-      await o.latido();
-      $('latido').textContent = 'en vivo';
-      dibujar(o, new Set(o.feed.map((f) => f.altura).filter((h) => !antes.has(h))));
-    } catch (e) {
-      $('latido').textContent = `sin conexión con el nodo; reintento… (${e.message})`;
-    }
-  }
+let ultima = null;
+
+/** Qué hace la página con cada aviso del trabajador. */
+const AVISOS = {
+  avance({ altura, alto }) {
+    $('carga-texto').textContent = `Bloque ${altura.toLocaleString('es-CL')} de ${alto.toLocaleString('es-CL')}: firmas, transacciones y reglas.`;
+    $('carga-barra').value = altura / Math.max(alto, 1);
+  },
+  vista({ foto }) {
+    const antes = new Set((ultima ?? foto).feed.map((f) => f.altura));
+    ultima = foto;
+    $('latido').textContent = 'en vivo';
+    dibujar(foto, new Set(foto.feed.map((f) => f.altura).filter((h) => !antes.has(h))));
+  },
+  corte({ texto }) {
+    $('latido').textContent = `sin conexión con el nodo; reintento… (${texto})`;
+  },
+  falla({ texto }) {
+    fallar(texto);
+  },
+};
+
+/** seguir verifica en un Web Worker: la página solo dibuja y no se congela (FND-010). */
+function seguir(eleccion) {
+  const trabajador = new Worker(new URL('trabajador.js', import.meta.url), { type: 'module' });
+  trabajador.onmessage = ({ data }) => AVISOS[data.tipo](data);
+  trabajador.onerror = () => fallar('Este navegador no pudo cargar el verificador. Actualízalo o prueba con otro.');
+  const datos = { nodo: meta('mivoto-nodo'), validadores: meta('mivoto-validadores').split(','), eleccion };
+  trabajador.postMessage({ tipo: 'seguir', datos, visible: !document.hidden });
+  document.addEventListener('visibilitychange', () => {
+    trabajador.postMessage({ tipo: 'visible', visible: !document.hidden });
+  });
 }
 
-async function main() {
+function main() {
   const eleccion = eleccionDe(location.hash);
   if (!eleccion) return fallar('Falta la votación en el enlace. Pide el enlace de observador a quien organiza la votación.');
-  try {
-    const o = new Observador({
-      nodo: meta('mivoto-nodo'),
-      validadores: meta('mivoto-validadores').split(','),
-      eleccion,
-      votocore: await cargarVotocore(),
-      fetch: (...a) => fetch(...a),
-    });
-    await o.iniciar((h, alto) => {
-      $('carga-texto').textContent = `Bloque ${h.toLocaleString('es-CL')} de ${alto.toLocaleString('es-CL')}: firmas, transacciones y reglas.`;
-      $('carga-barra').value = h / Math.max(alto, 1);
-    });
-    dibujar(o);
-    setInterval(() => o.vista && ($('estado').textContent = estadoDe(o.vista, Date.now()).texto), 1000);
-    vivir(o);
-  } catch (e) {
-    fallar(`No se pudo verificar la cadena: ${e.message}`);
-  }
+  seguir(eleccion);
+  setInterval(() => {
+    if (ultima?.vista) $('estado').textContent = estadoDe(ultima.vista, Date.now()).texto;
+  }, 1000);
 }
 
 window.addEventListener('hashchange', () => location.reload());
