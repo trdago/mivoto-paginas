@@ -1,9 +1,10 @@
 // Núcleo del observador web de Mi Voto: sin DOM, para probarlo en node (observar_test.mjs).
-// Cada bloque se verifica con votocore (WebAssembly) y los validadores fijados en la página;
-// del nodo solo se leen bytes con GET. Ver .qdd/project/modules/observador-web.yaml.
+// votocore (WebAssembly) verifica con los validadores fijados en la página; del nodo solo se leen bytes con GET.
+// Al abrir encadena y recuenta hasta un bloque firmado por todos; las firmas de cada voto se revisan a demanda. Ver .qdd/project/modules/observador-web.yaml.
 
 export const LATIDO_MS = 2000;
-const PAGINA = 100; // bloques por pedido al sincronizar
+const PAGINA = 250; // bloques por pedido
+const A_LA_VEZ = 8; // pedidos simultáneos al sincronizar
 const LOTE = 128 * 1024; // bytes por verificación: los bloques pesados avisan su avance
 
 const ETIQUETAS = {
@@ -86,10 +87,45 @@ export function lotes(bloques, max = LOTE) {
   return grupos;
 }
 
+/** rangos junta alturas seguidas en tramos [desde, hasta] de a lo más `max` bloques. */
+export function rangos(alturas, max = PAGINA) {
+  const tramos = [];
+  for (const h of alturas) {
+    const ultimo = tramos.at(-1);
+    if (ultimo && ultimo[1] === h - 1 && h - ultimo[0] < max) {
+      ultimo[1] = h;
+      continue;
+    }
+    tramos.push([h, h]);
+  }
+  return tramos;
+}
+
+/** enOrden baja hasta `aLaVez` cosas a la vez y las entrega en el orden pedido. */
+export async function* enOrden(pedidos, bajar, aLaVez = A_LA_VEZ) {
+  const enVuelo = [];
+  for (const p of pedidos) {
+    const bajada = bajar(p);
+    bajada.catch(() => {}); // si falla, lo dice quien la espera
+    enVuelo.push(bajada);
+    if (enVuelo.length >= aLaVez) yield enVuelo.shift();
+  }
+  yield* enVuelo;
+}
+
 /** unir arma un solo cuerpo, como una página de /v1/blocks, con bloques separados por porBloque. */
 function unir(bloques) {
   const texto = bloques.map((b) => JSON.parse(new TextDecoder().decode(b)).blocks[0]);
   return new TextEncoder().encode(JSON.stringify({ blocks: texto }));
+}
+
+/** revisadas dice en palabras cuántas transacciones de la votación tienen su firma revisada. */
+export function revisadas(vista) {
+  const n = (x) => x.toLocaleString('es-CL');
+  if (vista.txs_checked >= vista.txs) {
+    return { completa: true, texto: `Las ${n(vista.txs)} transacciones de esta votación tienen su firma revisada en tu navegador.` };
+  }
+  return { completa: false, texto: `Revisando las firmas de esta votación: ${n(vista.txs_checked)} de ${n(vista.txs)} transacciones.` };
 }
 
 /** foto es lo que la página dibuja: datos sueltos, que pasan del Web Worker a la página. */
@@ -139,9 +175,12 @@ function evento(e, eleccion) {
   return veces + etiqueta(e.kind) + titulo;
 }
 
+/** ErrorDeVerificacion es lo que no se arregla reintentando: la cadena entregada no verifica. */
+export class ErrorDeVerificacion extends Error {}
+
 /**
- * Observador sigue la cadena: la sincroniza desde el bloque 1 verificando cada uno y luego, en cada latido, baja
- * solo los bloques nuevos. Mira una votación o todas (eleccion null). Solo hace GET al nodo.
+ * Observador sigue la cadena: la encadena y recuenta desde el bloque 1 hasta uno firmado por los validadores y luego,
+ * en cada latido, baja solo los bloques nuevos. Mira una votación o todas (eleccion null). Solo hace GET al nodo.
  */
 export class Observador {
   constructor({ nodo, validadores, eleccion = null, votocore, fetch }) {
@@ -171,7 +210,7 @@ export class Observador {
     this.actualizar();
   }
 
-  /** mirar cambia de votación (null: todas) con lo ya verificado. */
+  /** mirar cambia de votación (null: todas) con lo ya encadenado. */
   mirar(eleccion) {
     this.eleccion = eleccion;
     this.actualizar();
@@ -188,18 +227,40 @@ export class Observador {
   }
 
   async sincronizar(progreso) {
-    for (;;) {
-      const bytes = new Uint8Array(await (await this.leer(`/v1/blocks?from=${this.altura + 1}&limit=${PAGINA}`)).arrayBuffer());
-      const bloques = porBloque(bytes);
-      if (bloques.length === 0) return;
-      for (const lote of lotes(bloques)) this.aplicar(lote, progreso);
+    const { height } = this.nodoEstado;
+    const faltan = Array.from({ length: height - this.altura }, (_, i) => this.altura + 1 + i);
+    for await (const pagina of enOrden(rangos(faltan), (r) => this.bajar(r))) {
+      this.altura = falla(this.votocore.link(pagina)).height || this.altura;
+      progreso({ altura: this.altura, alto: height });
     }
+    if (this.altura < height) throw new Error(`el nodo anuncia ${height} bloques y entrega ${this.altura}`);
+    falla(this.votocore.seal());
   }
 
-  aplicar(lote, progreso) {
-    const { height, txs } = falla(this.votocore.apply(unir(lote)));
-    this.altura = height;
-    progreso({ altura: height, alto: this.nodoEstado.height, txs });
+  /** faltan son las alturas cuyas firmas no se han revisado: de una votación, o de toda la cadena con null. */
+  faltan(eleccion) {
+    return JSON.parse(falla(this.votocore.unchecked(eleccion ?? '')).json);
+  }
+
+  /**
+   * revisar baja y revisa las firmas que faltan de una votación, o de toda la cadena con null. `alAvanzar` corre tras
+   * cada lote; si `sigue` dice que no, se detiene ahí.
+   */
+  async revisar(eleccion, { alAvanzar = async () => {}, sigue = () => true } = {}) {
+    const tramos = rangos(this.faltan(eleccion));
+    for await (const pagina of enOrden(tramos, (r) => this.bajar(r))) {
+      for (const lote of lotes(porBloque(pagina))) {
+        if (!sigue()) return;
+        falla(this.votocore.check(unir(lote)));
+        await alAvanzar();
+      }
+    }
+    const pendiente = this.faltan(eleccion)[0];
+    if (pendiente && pendiente <= tramos.at(-1)[1]) throw new Error(`el nodo no entregó el bloque ${pendiente}`);
+  }
+
+  async bajar([desde, hasta]) {
+    return new Uint8Array(await (await this.leer(`/v1/blocks?from=${desde}&limit=${hasta - desde + 1}`)).arrayBuffer());
   }
 
   async leer(ruta) {
@@ -210,6 +271,6 @@ export class Observador {
 }
 
 function falla(r) {
-  if (r.error) throw new Error(r.error);
+  if (r.error) throw new ErrorDeVerificacion(r.error);
   return r;
 }
