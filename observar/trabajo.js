@@ -6,7 +6,8 @@ const pausa = (ms) => new Promise((r) => setTimeout(() => r(true), ms));
 
 /**
  * trabajo devuelve `seguir()`, que abre y sigue la cadena; `ver(eleccion)`, que cambia de votación (null: todas) y
- * revisa las firmas de esa; `verificarTodo()`, que revisa las de toda la cadena; y `revisado()`, que espera a que no
+ * revisa las firmas de esa; `verificarTodo()`, que revisa las de toda la cadena; `detener()`, que la
+ * detiene; y `revisado()`, que espera a que no
  * quede nada por revisar. Avisa `avance`, `vista`, `corte` (sin conexión, se reintenta) o `falla` (no verifica).
  * `visible` dice si la pestaña se ve: oculta no consulta al nodo ni revisa. `dormir` en falso termina.
  */
@@ -59,7 +60,7 @@ export function trabajo({ datos, avisar, cargarVotocore, fetch, visible, dormir 
 
   /** revisar pone a revisar firmas si no se está en eso. */
   function revisar() {
-    if (todo.pedida) todo.faltan = listo.faltan(null).length;
+    contarFaltantes();
     revision ??= revisarObjetivos().catch(tropezar).finally(() => { revision = null; });
   }
 
@@ -70,8 +71,13 @@ export function trabajo({ datos, avisar, cargarVotocore, fetch, visible, dormir 
     }
   }
 
+  /** contarFaltantes pone al día lo que falta de toda la cadena, si alguna vez se pidió. */
+  function contarFaltantes() {
+    if (todo.pedida || todo.faltan !== null) todo.faltan = listo.faltan(null).length;
+  }
+
   async function refrescar() {
-    if (todo.pedida) todo.faltan = listo.faltan(null).length;
+    contarFaltantes();
     listo.actualizar();
     mostrar();
     await respirar();
@@ -102,6 +108,13 @@ export function trabajo({ datos, avisar, cargarVotocore, fetch, visible, dormir 
       if (!listo || roto) return;
       todo.pedida = true;
       revisar();
+      mostrar();
+    },
+    /** detener deja de revisar toda la cadena; lo ya revisado queda, y al pedirlo de nuevo sigue desde ahí. */
+    detener() {
+      if (!todo.pedida) return;
+      todo.pedida = false;
+      contarFaltantes();
       mostrar();
     },
     async revisado() {
