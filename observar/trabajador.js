@@ -32,6 +32,9 @@ const PEDIDOS = {
   todo() {
     encargo.verificarTodo();
   },
+  detener() {
+    encargo.detener();
+  },
   visible() {},
 };
 
