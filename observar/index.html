@@ -135,10 +135,14 @@ footer { margin-top: 24px; color: var(--suave); font-size: 13px; }
         <div id="verif-titulo"></div>
         <div id="verif-detalle" class="suave"></div>
         <p id="verif-limite" class="suave">La firma de cada voto se revisa al entrar a su votación. Hasta entonces no se detectarían votos inventados por los 2 validadores de acuerdo.</p>
-        <button id="verificar-todo" type="button">Verificar toda la cadena</button>
+        <div id="todo-pedir">
+          <button id="verificar-todo" type="button">Verificar toda la cadena</button>
+          <p id="todo-costo" class="suave">Lo calcula tu aparato, no nuestro servidor. Toma desde medio minuto en un computador hasta varios minutos en un teléfono, y gasta batería. Lo puedes detener cuando quieras.</p>
+        </div>
         <div id="todo-avance" hidden>
           <p id="todo-texto" class="suave"></p>
           <progress id="todo-barra" max="1" value="0" aria-label="Revisando las firmas de toda la cadena"></progress>
+          <button id="detener-todo" type="button">Detener</button>
         </div>
         <div id="nodo" class="suave"></div>
         <div id="nodo-distinto" class="aviso" hidden>El nodo anuncia validadores distintos de los fijados en esta página: no se adoptan y sus bloques no verifican.</div>
