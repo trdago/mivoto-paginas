@@ -5,6 +5,7 @@
 export const LATIDO_MS = 2000;
 const PAGINA = 100; // bloques por pedido al sincronizar
 const MAX_FEED = 30;
+const LOTE = 128 * 1024; // bytes por verificación: los bloques pesados avisan su avance
 
 const ETIQUETAS = {
   DEVICE_REGISTER: 'Registro de teléfono',
@@ -72,6 +73,33 @@ export function porBloque(bytes) {
   return blocks.map((b) => new TextEncoder().encode(JSON.stringify({ blocks: [b] })));
 }
 
+/** lotes agrupa bloques hasta `max` bytes por grupo; uno más grande va solo. */
+export function lotes(bloques, max = LOTE) {
+  const grupos = [];
+  let bytes = Infinity;
+  for (const b of bloques) {
+    bytes += b.length;
+    if (bytes > max) {
+      grupos.push([]);
+      bytes = b.length;
+    }
+    grupos.at(-1).push(b);
+  }
+  return grupos;
+}
+
+/** unir arma un solo cuerpo, como una página de /v1/blocks, con bloques separados por porBloque. */
+function unir(bloques) {
+  const texto = bloques.map((b) => JSON.parse(new TextDecoder().decode(b)).blocks[0]);
+  return new TextEncoder().encode(JSON.stringify({ blocks: texto }));
+}
+
+/** foto es lo que la página dibuja: datos sueltos, que pasan del Web Worker a la página. */
+export function foto(o) {
+  const { altura, vista, feed, nodoEstado, nodoDistinto, validadores } = o;
+  return { altura, vista, feed, nodoEstado, nodoDistinto, validadores };
+}
+
 /** filaDeBloque resume un bloque verificado para la lista en vivo. */
 export function filaDeBloque(b) {
   const propias = b.txs.filter((t) => t.mine);
@@ -133,9 +161,11 @@ export class Observador {
       const bytes = new Uint8Array(await (await this.leer(`/v1/blocks?from=${this.altura + 1}&limit=${PAGINA}`)).arrayBuffer());
       const bloques = porBloque(bytes);
       if (bloques.length === 0) return;
-      this.altura = falla(this.votocore.apply(bytes)).height;
+      for (const lote of lotes(bloques)) {
+        this.altura = falla(this.votocore.apply(unir(lote))).height;
+        progreso(this.altura, this.nodoEstado.height);
+      }
       if (enVivo) bloques.forEach((b) => this.alFeed(b));
-      progreso(this.altura, this.nodoEstado.height);
     }
   }
 
