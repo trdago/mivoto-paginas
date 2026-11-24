@@ -6,6 +6,7 @@ export const LATIDO_MS = 2000;
 const PAGINA = 250; // bloques por pedido
 const A_LA_VEZ = 8; // pedidos simultáneos al sincronizar
 const LOTE = 128 * 1024; // bytes por verificación: los bloques pesados avisan su avance
+const CUPO = 32 * 1024 * 1024; // bytes de bloques en memoria, para revisar sus firmas sin bajarlos de nuevo
 
 const ETIQUETAS = {
   DEVICE_REGISTER: 'Registro de teléfono',
@@ -66,10 +67,9 @@ export function filasResultado(vista) {
   });
 }
 
-/** porBloque parte una respuesta de /v1/blocks en cuerpos de un bloque, para verificarlos por lotes. */
-export function porBloque(bytes) {
-  const { blocks = [] } = JSON.parse(new TextDecoder().decode(bytes));
-  return blocks.map((b) => new TextEncoder().encode(JSON.stringify({ blocks: [b] })));
+/** bloquesDe saca los bloques (texto base64) de una respuesta de /v1/blocks. */
+export function bloquesDe(bytes) {
+  return JSON.parse(new TextDecoder().decode(bytes)).blocks ?? [];
 }
 
 /** lotes agrupa bloques hasta `max` bytes por grupo; uno más grande va solo. */
@@ -113,10 +113,9 @@ export async function* enOrden(pedidos, bajar, aLaVez = A_LA_VEZ) {
   yield* enVuelo;
 }
 
-/** unir arma un solo cuerpo, como una página de /v1/blocks, con bloques separados por porBloque. */
+/** unir arma un solo cuerpo, como una página de /v1/blocks, con bloques separados por bloquesDe. */
 function unir(bloques) {
-  const texto = bloques.map((b) => JSON.parse(new TextDecoder().decode(b)).blocks[0]);
-  return new TextEncoder().encode(JSON.stringify({ blocks: texto }));
+  return new TextEncoder().encode(JSON.stringify({ blocks: bloques }));
 }
 
 /** revisadas dice en palabras cuántas transacciones de la votación tienen su firma revisada. */
@@ -183,8 +182,9 @@ export class ErrorDeVerificacion extends Error {}
  * en cada latido, baja solo los bloques nuevos. Mira una votación o todas (eleccion null). Solo hace GET al nodo.
  */
 export class Observador {
-  constructor({ nodo, validadores, eleccion = null, votocore, fetch }) {
-    Object.assign(this, { nodo, validadores, eleccion, votocore, fetch });
+  constructor({ nodo, validadores, eleccion = null, votocore, fetch, cupo = CUPO }) {
+    Object.assign(this, { nodo, validadores, eleccion, votocore, fetch, cupo });
+    this.memoria = new Map(); // altura → bloque por revisar; solo en memoria, nada queda en el aparato
     this.altura = 0;
     this.elecciones = [];
     this.feed = [];
@@ -230,7 +230,9 @@ export class Observador {
     const { height } = this.nodoEstado;
     const faltan = Array.from({ length: height - this.altura }, (_, i) => this.altura + 1 + i);
     for await (const pagina of enOrden(rangos(faltan), (r) => this.bajar(r))) {
+      const desde = this.altura + 1;
       this.altura = falla(this.votocore.link(pagina)).height || this.altura;
+      this.recordar(desde, pagina);
       progreso({ altura: this.altura, alto: height });
     }
     if (this.altura < height) throw new Error(`el nodo anuncia ${height} bloques y entrega ${this.altura}`);
@@ -248,15 +250,43 @@ export class Observador {
    */
   async revisar(eleccion, { alAvanzar = async () => {}, sigue = () => true } = {}) {
     const tramos = rangos(this.faltan(eleccion));
-    for await (const pagina of enOrden(tramos, (r) => this.bajar(r))) {
-      for (const lote of lotes(porBloque(pagina))) {
+    for await (const { desde, bloques } of enOrden(tramos, (t) => this.tramo(t))) {
+      let altura = desde;
+      for (const lote of lotes(bloques)) {
         if (!sigue()) return;
         falla(this.votocore.check(unir(lote)));
+        altura = this.soltar(altura, lote.length);
         await alAvanzar();
       }
     }
     const pendiente = this.faltan(eleccion)[0];
     if (pendiente && pendiente <= tramos.at(-1)[1]) throw new Error(`el nodo no entregó el bloque ${pendiente}`);
+  }
+
+  /** tramo entrega los bloques de un tramo: de la memoria si están todos, o bajados del nodo. */
+  async tramo([desde, hasta]) {
+    const bloques = [];
+    for (let h = desde; this.memoria.has(h) && h <= hasta; h++) bloques.push(this.memoria.get(h));
+    if (bloques.length === hasta - desde + 1) return { desde, bloques };
+    return { desde, bloques: bloquesDe(await this.bajar([desde, hasta])) };
+  }
+
+  /** recordar deja en memoria los bloques recién bajados, mientras quepan. */
+  recordar(desde, pagina) {
+    bloquesDe(pagina).forEach((b, i) => {
+      if (b.length > this.cupo) return;
+      this.cupo -= b.length;
+      this.memoria.set(desde + i, b);
+    });
+  }
+
+  /** soltar saca de la memoria `n` bloques ya revisados y devuelve la altura que sigue. */
+  soltar(desde, n) {
+    for (let h = desde; h < desde + n; h++) {
+      this.cupo += this.memoria.get(h)?.length ?? 0;
+      this.memoria.delete(h);
+    }
+    return desde + n;
   }
 
   async bajar([desde, hasta]) {
