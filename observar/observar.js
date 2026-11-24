@@ -1,6 +1,6 @@
 // Interfaz del observador: dibuja lo que verifica el Web Worker (trabajador.js), la portada con todas las votaciones
 // o una sola (#<votación>). Todo texto que viene de la cadena entra con textContent, nunca como HTML.
-import { cierre, eleccionDe, estadoDe, filasResultado, listado, participacion } from './nucleo.js';
+import { cierre, eleccionDe, estadoDe, filasResultado, listado, participacion, revisadas } from './nucleo.js';
 
 const $ = (id) => document.getElementById(id);
 const meta = (nombre) => document.querySelector(`meta[name="${nombre}"]`).content;
@@ -126,13 +126,29 @@ function problemaDe(o) {
   return revisadas.map((v) => v.invariants).find(Boolean);
 }
 
+/** tituloDe dice qué se revisó de lo que se ve: la votación con sus firmas, o la cadena. */
+function tituloDe(o) {
+  if (o.vista) return revisadas(o.vista).texto;
+  if (o.todo.faltan === 0) return `${miles(o.altura)} bloques con todas sus firmas revisadas en tu navegador`;
+  return `${miles(o.altura)} bloques encadenados y recontados en tu navegador`;
+}
+
+/** dibujarTodo es el botón de verificar toda la cadena y cuánto le falta. */
+function dibujarTodo({ todo, altura }) {
+  $('verificar-todo').hidden = todo.pedida;
+  $('todo-avance').hidden = !todo.faltan;
+  if (!todo.faltan) return;
+  $('todo-texto').textContent = `Revisando las firmas de toda la cadena: faltan ${miles(todo.faltan)} de ${miles(altura)} bloques.`;
+  $('todo-barra').value = 1 - todo.faltan / altura;
+}
+
 function dibujarVerificacion(o) {
   const problema = problemaDe(o);
-  $('verif-titulo').textContent = problema
-    ? `La verificación encontró un problema: ${problema}`
-    : `${miles(o.altura)} bloques verificados en tu navegador`;
+  $('verif-titulo').textContent = problema ? `La verificación encontró un problema: ${problema}` : tituloDe(o);
   $('verif-titulo').className = problema ? 'error' : '';
-  $('verif-detalle').textContent = `Firmas de los 2 validadores (${o.validadores.map(corto).join(' · ')}), cada transacción y el recuento propio.`;
+  $('verif-detalle').textContent = `El último bloque lleva la firma de los 2 validadores (${o.validadores.map(corto).join(' · ')}) y amarra a todos los anteriores: si uno cambiara, dejaría de encadenar. El recuento se hace aquí.`;
+  $('verif-limite').hidden = Boolean(o.vista) || o.todo.faltan === 0;
+  dibujarTodo(o);
   const s = o.nodoEstado;
   $('nodo').textContent = `Nodo: bloque ${miles(s.height)} · ${s.peer_healthy ? 'los 2 validadores en línea' : 'esperando al segundo validador'} · confirma en ~${Math.round(s.p95_finality_ms)} ms`;
   $('nodo-distinto').hidden = !o.nodoDistinto;
@@ -164,8 +180,9 @@ function nuevasDe(foto) {
 
 /** Qué hace la página con cada aviso del trabajador. */
 const AVISOS = {
-  avance({ altura, alto, txs }) {
-    $('carga-texto').textContent = `Bloque ${miles(altura)} de ${miles(alto)} · ${miles(txs)} transacciones verificadas. Unos bloques traen muchas más que otros y tardan más.`;
+  avance({ altura, alto }) {
+    $('carga-texto').textContent = `Bloque ${miles(altura)} de ${miles(alto)}: encadenando y recontando.`;
+    $('carga-barra').value = altura / Math.max(alto, 1);
   },
   vista({ foto }) {
     const nuevas = nuevasDe(foto);
@@ -192,6 +209,7 @@ function seguir() {
   const datos = { nodo: meta('mivoto-nodo'), validadores: meta('mivoto-validadores').split(','), eleccion: eleccionDe(location.hash) };
   enviar({ tipo: 'seguir', datos });
   document.addEventListener('visibilitychange', () => enviar({ tipo: 'visible' }));
+  $('verificar-todo').addEventListener('click', () => enviar({ tipo: 'todo' }));
   window.addEventListener('hashchange', () => enviar({ tipo: 'ver', eleccion: eleccionDe(location.hash) }));
 }
 
