@@ -62,6 +62,9 @@ li.propio { border-left: 3px solid var(--acento); padding-left: 10px; }
 li.nuevo { animation: entrar .6s ease-out; }
 @keyframes entrar { from { background: var(--acento-suave); } }
 progress { width: 100%; height: 6px; accent-color: var(--acento); }
+.verif p { margin: 4px 0; }
+button { font: inherit; font-size: 13px; padding: 6px 12px; margin: 6px 0; border: 1px solid var(--linea); border-radius: 8px; background: var(--acento-suave); color: var(--acento); cursor: pointer; }
+button:focus-visible { outline: 2px solid var(--acento); outline-offset: 2px; }
 footer { margin-top: 24px; color: var(--suave); font-size: 13px; }
 [hidden] { display: none !important; }
 </style>
@@ -74,9 +77,9 @@ footer { margin-top: 24px; color: var(--suave); font-size: 13px; }
   </header>
 
   <section id="carga" class="tarjeta">
-    <h2>Verificando en tu navegador</h2>
+    <h2>Abriendo la cadena en tu navegador</h2>
     <p id="carga-texto" class="suave">Cargando el verificador…</p>
-    <progress id="carga-barra" aria-label="Verificando la cadena"></progress>
+    <progress id="carga-barra" max="1" aria-label="Abriendo la cadena"></progress>
   </section>
 
   <section id="falla" class="tarjeta" hidden>
@@ -131,6 +134,12 @@ footer { margin-top: 24px; color: var(--suave); font-size: 13px; }
       <div>
         <div id="verif-titulo"></div>
         <div id="verif-detalle" class="suave"></div>
+        <p id="verif-limite" class="suave">La firma de cada voto se revisa al entrar a su votación. Hasta entonces no se detectarían votos inventados por los 2 validadores de acuerdo.</p>
+        <button id="verificar-todo" type="button">Verificar toda la cadena</button>
+        <div id="todo-avance" hidden>
+          <p id="todo-texto" class="suave"></p>
+          <progress id="todo-barra" max="1" value="0" aria-label="Revisando las firmas de toda la cadena"></progress>
+        </div>
         <div id="nodo" class="suave"></div>
         <div id="nodo-distinto" class="aviso" hidden>El nodo anuncia validadores distintos de los fijados en esta página: no se adoptan y sus bloques no verifican.</div>
       </div>
@@ -141,7 +150,7 @@ footer { margin-top: 24px; color: var(--suave); font-size: 13px; }
         <h2>Cadena en vivo</h2>
         <span class="suave vivo" id="latido">en vivo</span>
       </div>
-      <p class="suave" style="margin-top:0">Cada bloque lleva la firma de los 2 validadores y se verifica aquí antes de mostrarse. <span id="ayuda-marcados">Los marcados tienen transacciones de esta votación.</span> <span id="ayuda-secreta" hidden>Con una votación secreta abierta no se dice cuántas transacciones trae cada bloque ni cuál lleva un voto.</span></p>
+      <p class="suave" style="margin-top:0">Las firmas de los validadores de cada bloque que ves aquí se revisaron en tu navegador. <span id="ayuda-marcados">Los marcados tienen transacciones de esta votación.</span> <span id="ayuda-secreta" hidden>Con una votación secreta abierta no se dice cuántas transacciones trae cada bloque ni cuál lleva un voto.</span></p>
       <ol id="feed"></ol>
     </section>
   </div>
