@@ -5,34 +5,49 @@ import { LATIDO_MS, Observador, foto } from './nucleo.js';
 const pausa = (ms) => new Promise((r) => setTimeout(() => r(true), ms));
 
 /**
- * trabajar sincroniza y sigue la votación. Avisa `avance`, `vista`, `corte` (sin conexión, se reintenta) o `falla`
- * (no se pudo verificar). `visible` dice si la pestaña se ve: oculta no consulta al nodo. `dormir` en falso termina.
+ * trabajo devuelve `seguir()`, que sincroniza y sigue la cadena, y `ver(eleccion)`, que cambia de votación (null:
+ * todas) sin volver a verificar. Avisa `avance`, `vista`, `corte` (sin conexión, se reintenta) o `falla` (no se pudo
+ * verificar). `visible` dice si la pestaña se ve: oculta no consulta al nodo. `dormir` en falso termina.
  */
-export async function trabajar({ datos, avisar, cargarVotocore, fetch, visible, dormir = pausa }) {
-  const o = await verificar({ datos, avisar, cargarVotocore, fetch });
-  if (!o) return;
-  while (await dormir(LATIDO_MS)) {
-    if (visible()) await latir(o, avisar);
-  }
-}
+export function trabajo({ datos, avisar, cargarVotocore, fetch, visible, dormir = pausa }) {
+  let { eleccion } = datos;
+  let listo = null;
+  const mostrar = (o) => avisar({ tipo: 'vista', foto: foto(o) });
 
-async function verificar({ datos, avisar, cargarVotocore, fetch }) {
-  try {
+  async function verificar() {
     const o = new Observador({ ...datos, votocore: await cargarVotocore(), fetch });
-    await o.iniciar((altura, alto) => avisar({ tipo: 'avance', altura, alto }));
-    avisar({ tipo: 'vista', foto: foto(o) });
+    await o.iniciar((avance) => avisar({ tipo: 'avance', ...avance }));
     return o;
-  } catch (e) {
-    avisar({ tipo: 'falla', texto: `No se pudo verificar la cadena: ${e.message}` });
-    return null;
   }
-}
 
-async function latir(o, avisar) {
-  try {
-    await o.latido();
-    avisar({ tipo: 'vista', foto: foto(o) });
-  } catch (e) {
-    avisar({ tipo: 'corte', texto: e.message });
+  async function latir() {
+    try {
+      await listo.latido();
+      mostrar(listo);
+    } catch (e) {
+      avisar({ tipo: 'corte', texto: e.message });
+    }
   }
+
+  return {
+    async seguir() {
+      try {
+        listo = await verificar();
+        listo.mirar(eleccion);
+        mostrar(listo);
+      } catch (e) {
+        avisar({ tipo: 'falla', texto: `No se pudo verificar la cadena: ${e.message}` });
+        return;
+      }
+      while (await dormir(LATIDO_MS)) {
+        if (visible()) await latir();
+      }
+    },
+    ver(pedida) {
+      eleccion = pedida;
+      if (!listo) return;
+      listo.mirar(pedida);
+      mostrar(listo);
+    },
+  };
 }
