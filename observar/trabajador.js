@@ -29,6 +29,9 @@ const PEDIDOS = {
   ver({ eleccion }) {
     encargo.ver(eleccion);
   },
+  todo() {
+    encargo.verificarTodo();
+  },
   visible() {},
 };
 
