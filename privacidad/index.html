@@ -60,6 +60,9 @@
     <li>Para que la hora no relacione tu participación con tu voto, la app lo envía en un momento al azar, normalmente
       entre 5 y 90 segundos después; cerca del cierre la espera es menor. Si muy poca gente vota a la vez, la hora todavía
       puede dar pistas.</li>
+    <li>Mientras una votación secreta está abierta, el observador muestra sus totales (credenciales y votos) en vivo, sin
+      decir en qué bloque está cada uno. Como los totales se mueven y los bloques son públicos, todavía se puede deducir la
+      hora de cada participación.</li>
     <li>Los dos nodos de la red los opera Fair Play, y hoy tu participación y tu voto entran por el mismo servidor. Quien lo
       controle, o controle la red por la que te conectas, podría intentar relacionarlos por la hora y la dirección IP.</li>
     <li>Las versiones 1 y 2 de la app enviaban el voto sin esa espera: es posible relacionar esos votos con su
@@ -86,8 +89,11 @@
       acompaña al voto secreto.</li>
     <li>La página del observador se sirve desde GitHub Pages, que recibe la dirección IP de quien la visita, y lee los
       bloques del nodo. No pide ni guarda datos.</li>
-    <li>Cualquier persona puede auditar la cadena desde la app o seguirla en la página del observador. Lo que ve es lo descrito arriba: claves públicas,
-      votaciones, participaciones, votos secretos sin datos del teléfono y toques URFA.</li>
+    <li>Cualquier persona puede auditar la cadena desde la app o seguirla en la página del observador. Lo que ve es lo
+      descrito arriba: claves públicas, votaciones, participaciones, votos secretos sin datos del teléfono y toques URFA.</li>
+    <li>La página del observador muestra a cualquiera, sin enlace ni permiso, todas las votaciones de la cadena: su
+      pregunta, opciones, horario, estado y participación, y el resultado cuando corresponde. Vale para todas, también las
+      creadas antes de este aviso. Desde la versión 4, la app lo avisa antes de publicar una votación.</li>
     <li>No vendemos ni compartimos datos con terceros.</li>
   </ul>
 
