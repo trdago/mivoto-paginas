@@ -1,9 +1,10 @@
 // Web Worker del observador: votocore (WebAssembly) verifica aquí, para que la página no se congele (FND-010).
 import './wasm_exec.js';
 
-import { trabajar } from './trabajo.js';
+import { trabajo } from './trabajo.js';
 
 let visible = true;
+let encargo = null;
 
 async function cargarVotocore() {
   const go = new Go();
@@ -14,14 +15,24 @@ async function cargarVotocore() {
   return globalThis.votocore;
 }
 
+const PEDIDOS = {
+  seguir({ datos }) {
+    encargo = trabajo({
+      datos,
+      avisar: (m) => self.postMessage(m),
+      cargarVotocore,
+      fetch: (...a) => fetch(...a),
+      visible: () => visible,
+    });
+    encargo.seguir();
+  },
+  ver({ eleccion }) {
+    encargo.ver(eleccion);
+  },
+  visible() {},
+};
+
 self.onmessage = ({ data }) => {
   visible = data.visible;
-  if (data.tipo !== 'seguir') return;
-  trabajar({
-    datos: data.datos,
-    avisar: (m) => self.postMessage(m),
-    cargarVotocore,
-    fetch: (...a) => fetch(...a),
-    visible: () => visible,
-  });
+  PEDIDOS[data.tipo](data);
 };
