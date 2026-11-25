@@ -49,6 +49,9 @@
       mediante firmas ciegas: se registra sin datos de tu teléfono. Lee abajo los límites de ese secreto.</li>
     <li>En una votación URFA (juego), cada toque, con el identificador de tu dispositivo. Son públicos a propósito: así se
       arma el ranking.</li>
+    <li>Si tokenizas un acta (desde la versión 5): el código de elección, el de mesa, los totales que escribes y la huella
+      (SHA-256) del archivo, con la clave pública de tu dispositivo. Cualquiera puede ver que los firmó el mismo
+      dispositivo. <strong>Mi Voto no envía la foto ni el archivo</strong>, y el token no lleva nombres ni texto libre.</li>
   </ul>
   <p>VotoChain no se puede modificar ni borrar: esa es la garantía de que nadie altera un resultado. Por eso lo que ya
     quedó en la cadena no se puede eliminar. No contiene datos que te identifiquen por sí solos.</p>
@@ -75,7 +78,11 @@
       cadena. Con ese código se puede saber qué votaste; no se lo muestres a nadie.</li>
     <li>Mientras tu voto secreto espera para salir, el voto ya firmado. Se borra cuando la red lo confirma o lo rechaza
       de forma definitiva.</li>
-    <li>Desde la versión 3, nada de esto se respalda en la nube ni se traspasa a otro teléfono.</li>
+    <li>Tus actas tokenizadas: sus códigos y el código del token; y las que esperan señal, ya firmadas. La foto que tomas
+      con la app se guarda sin ubicación ni datos de la cámara en tu galería, en «Mi Voto»: es tuya, y si tu galería se
+      respalda en la nube, también se respalda. Mi Voto no pide permiso para ver tus fotos ni tu ubicación: usa la cámara
+      y el selector de archivos de Android.</li>
+    <li>Desde la versión 3, nada de lo que guarda la app se respalda en la nube ni se traspasa a otro teléfono.</li>
     <li>Al desinstalar la app se borran estos datos y la clave del dispositivo. Una instalación nueva es un dispositivo
       nuevo.</li>
   </ul>
@@ -90,7 +97,9 @@
     <li>La página del observador se sirve desde GitHub Pages, que recibe la dirección IP de quien la visita, y lee los
       bloques del nodo. No pide ni guarda datos.</li>
     <li>Cualquier persona puede auditar la cadena desde la app o seguirla en la página del observador. Lo que ve es lo
-      descrito arriba: claves públicas, votaciones, participaciones, votos secretos sin datos del teléfono y toques URFA.</li>
+      descrito arriba: claves públicas, votaciones, participaciones, votos secretos sin datos del teléfono, toques URFA y
+      actas tokenizadas. Si en el observador eliges un archivo para comprobarlo, tu navegador calcula su huella: el archivo
+      no se envía ni se guarda.</li>
     <li>La página del observador muestra a cualquiera, sin enlace ni permiso, todas las votaciones de la cadena: su
       pregunta, opciones, horario, estado y participación, y el resultado cuando corresponde. Vale para todas, también las
       creadas antes de este aviso. Desde la versión 4, la app lo avisa antes de publicar una votación.</li>
