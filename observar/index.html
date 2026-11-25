@@ -63,7 +63,14 @@ li.nuevo { animation: entrar .6s ease-out; }
 @keyframes entrar { from { background: var(--acento-suave); } }
 progress { width: 100%; height: 6px; accent-color: var(--acento); }
 .verif p { margin: 4px 0; }
-button { font: inherit; font-size: 13px; padding: 6px 12px; margin: 6px 0; border: 1px solid var(--linea); border-radius: 8px; background: var(--acento-suave); color: var(--acento); cursor: pointer; }
+button, label.boton { font: inherit; font-size: 13px; padding: 6px 12px; margin: 6px 0; border: 1px solid var(--linea); border-radius: 8px; background: var(--acento-suave); color: var(--acento); cursor: pointer; }
+label.boton { display: inline-block; }
+.oculto { position: absolute; width: 1px; height: 1px; opacity: 0; }
+#comprobar:focus-within label.boton { outline: 2px solid var(--acento); outline-offset: 2px; }
+table { width: 100%; border-collapse: collapse; font-variant-numeric: tabular-nums; }
+th, td { text-align: right; padding: 6px 4px; border-top: 1px solid var(--linea); }
+th { border-top: 0; font-size: 12px; font-weight: 600; color: var(--suave); }
+.ok { color: var(--ok); }
 button:focus-visible { outline: 2px solid var(--acento); outline-offset: 2px; }
 footer { margin-top: 24px; color: var(--suave); font-size: 13px; }
 [hidden] { display: none !important; }
@@ -86,7 +93,7 @@ footer { margin-top: 24px; color: var(--suave); font-size: 13px; }
     <p id="falla-texto" class="error"></p>
   </section>
 
-  <p id="enlace-malo" class="tarjeta aviso" hidden>El enlace no trae una votación completa. Estas son todas las de la cadena.</p>
+  <p id="enlace-malo" class="tarjeta aviso" hidden>El enlace no está completo. Esto es todo lo que hay en la cadena.</p>
 
   <div id="contenido" hidden>
     <div id="portada" hidden>
@@ -103,7 +110,49 @@ footer { margin-top: 24px; color: var(--suave); font-size: 13px; }
         <h2>Cerradas</h2>
         <div class="lista"></div>
       </section>
+      <section id="actas" class="tarjeta" hidden>
+        <h2>Actas tokenizadas</h2>
+        <p id="actas-cuantas" class="suave"></p>
+        <div class="lista"></div>
+      </section>
     </div>
+
+    <p id="acta-no-esta" class="tarjeta aviso" hidden>Esta acta no está en la cadena. Revisa que el enlace esté completo o mira <a href="#">todo lo que hay</a>.</p>
+
+    <div id="mesa" hidden>
+      <section class="tarjeta">
+        <p class="volver"><a href="#">← Volver</a></p>
+        <h1 id="mesa-titulo"></h1>
+        <div class="fila"><span class="etiqueta">Actas de una mesa</span><span id="mesa-cuantos" class="suave"></span></div>
+        <p id="mesa-lectura"></p>
+      </section>
+      <section class="tarjeta">
+        <h2>Totales tokenizados</h2>
+        <table id="mesa-totales">
+          <thead><tr><th scope="col">Válidos</th><th scope="col">Blancos</th><th scope="col">Nulos</th><th scope="col">Suma</th><th scope="col">Tokens</th></tr></thead>
+          <tbody></tbody>
+        </table>
+        <p class="suave">Los totales los digitó quien firmó cada token mirando el acta. La suma es válidos + blancos + nulos, para cuadrarla con el acta de papel.</p>
+      </section>
+      <section class="tarjeta">
+        <h2>Tokens</h2>
+        <ol id="mesa-tokens"></ol>
+        <p id="mesa-mas" class="suave" hidden></p>
+      </section>
+    </div>
+
+    <section id="comprobar" class="tarjeta" hidden>
+      <h2>Comprobar un archivo de acta</h2>
+      <p class="suave">Elige la foto o el archivo del acta. Tu navegador calcula su huella (SHA-256) y la busca en la cadena. El archivo no sale de tu aparato.</p>
+      <label class="boton" for="archivo">Elegir archivo</label>
+      <input id="archivo" type="file" accept="image/*,application/pdf" class="oculto">
+      <div id="comprobado" aria-live="polite" hidden>
+        <p id="comprobado-texto"></p>
+        <div id="comprobado-tokens" class="lista"></div>
+        <p id="comprobado-huella" class="mono suave"></p>
+      </div>
+      <p class="suave">Que coincida dice que el archivo no cambió, no que el acta sea verdadera. No es un registro oficial ni reemplaza a Servel.</p>
+    </section>
 
     <p id="no-esta" class="tarjeta aviso" hidden>Esta votación no está en la cadena. Revisa que el enlace esté completo o mira <a href="#">todas las votaciones</a>.</p>
 
@@ -164,6 +213,6 @@ footer { margin-top: 24px; color: var(--suave); font-size: 13px; }
     Esta página no pide ni guarda datos tuyos. <a href="../privacidad/">Privacidad</a>
   </footer>
 </main>
-<script type="module" src="v/1ef9a27c7a22d339/observar.js"></script>
+<script type="module" src="v/f0eb74e9ec7ca511/observar.js"></script>
 </body>
 </html>
