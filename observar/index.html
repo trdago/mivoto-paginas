@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Observador · Mi Voto</title>
-<meta name="description" content="Sigue en vivo las votaciones de Mi Voto y su cadena, verificadas en tu navegador.">
+<meta name="description" content="Sigue en vivo las elecciones de Mi Voto y su cadena, verificadas en tu navegador.">
 <meta name="robots" content="noindex">
 <!-- Fijados al publicar: la página verifica con estos validadores y nunca adopta los que anuncie el nodo. -->
 <meta name="mivoto-nodo" content="https://votochain.fairplay-chile.cl">
@@ -67,6 +67,14 @@ button, label.boton { font: inherit; font-size: 13px; padding: 6px 12px; margin:
 label.boton { display: inline-block; }
 .oculto { position: absolute; width: 1px; height: 1px; opacity: 0; }
 #comprobar:focus-within label.boton { outline: 2px solid var(--acento); outline-offset: 2px; }
+#tipos { display: flex; flex-wrap: wrap; gap: 8px; margin: 0 0 12px; padding: 0; border: 0; }
+#tipos legend { padding: 0; margin-bottom: 6px; }
+#tipos input { position: absolute; opacity: 0; }
+#tipos span { display: inline-block; font-size: 13px; padding: 6px 12px; border: 1px solid var(--linea); border-radius: 999px; background: var(--tarjeta); cursor: pointer; }
+#tipos input:checked + span { background: var(--acento-suave); border-color: var(--acento); color: var(--acento); }
+#tipos input:focus-visible + span { outline: 2px solid var(--acento); outline-offset: 2px; }
+#actas-buscar input { display: block; width: 100%; font: inherit; font-size: 15px; padding: 8px 10px; margin: 4px 0 12px; border: 1px solid var(--linea); border-radius: 8px; background: var(--fondo); color: var(--texto); }
+#actas-buscar input:focus-visible { outline: 2px solid var(--acento); outline-offset: 1px; }
 table { width: 100%; border-collapse: collapse; font-variant-numeric: tabular-nums; }
 th, td { text-align: right; padding: 6px 4px; border-top: 1px solid var(--linea); }
 th { border-top: 0; font-size: 12px; font-weight: 600; color: var(--suave); }
@@ -97,10 +105,17 @@ footer { margin-top: 24px; color: var(--suave); font-size: 13px; }
 
   <div id="contenido" hidden>
     <div id="portada" hidden>
+      <fieldset id="tipos">
+        <legend class="suave">Tipo de elección</legend>
+        <label><input type="radio" name="tipo" value="" checked><span>Todas</span></label>
+        <label><input type="radio" name="tipo" value="secreto"><span>Normales</span></label>
+        <label><input type="radio" name="tipo" value="urfa"><span>URFA</span></label>
+        <label><input type="radio" name="tipo" value="actas"><span>Respaldo de actas</span></label>
+      </fieldset>
       <section id="en-curso" class="tarjeta">
         <h2>En curso</h2>
         <div class="lista"></div>
-        <p class="suave vacio">No hay votaciones en curso.</p>
+        <p class="suave vacio">No hay elecciones en curso.</p>
       </section>
       <section id="por-empezar" class="tarjeta">
         <h2>Por empezar</h2>
@@ -110,18 +125,57 @@ footer { margin-top: 24px; color: var(--suave); font-size: 13px; }
         <h2>Cerradas</h2>
         <div class="lista"></div>
       </section>
-      <section id="actas" class="tarjeta" hidden>
-        <h2>Actas tokenizadas</h2>
-        <p id="actas-cuantas" class="suave"></p>
-        <div class="lista"></div>
+      <section id="sueltas" class="tarjeta" hidden>
+        <a class="votacion" href="#actas">
+          <strong>Actas sin elección</strong>
+          <div id="sueltas-cuantas" class="suave"></div>
+        </a>
       </section>
     </div>
 
     <p id="acta-no-esta" class="tarjeta aviso" hidden>Esta acta no está en la cadena. Revisa que el enlace esté completo o mira <a href="#">todo lo que hay</a>.</p>
 
+    <div id="votacion" hidden>
+      <section class="tarjeta">
+        <p class="volver"><a href="#">← Todas las elecciones</a></p>
+        <h1 id="titulo"></h1>
+        <div class="fila">
+          <span id="modo" class="etiqueta"></span>
+          <span id="estado" class="suave"></span>
+        </div>
+      </section>
+
+      <section class="tarjeta">
+        <h2>Participación en vivo</h2>
+        <div id="cifras" class="cifras"></div>
+      </section>
+
+      <section id="seccion-resultado" class="tarjeta">
+        <h2>Resultado</h2>
+        <div id="resultado"></div>
+        <p id="resultado-oculto" class="suave" hidden>Es una elección de voto secreto: el resultado por opción se muestra al cierre, recontado en tu navegador. Mientras tanto se ve cuánta gente participa, sin decir en qué bloque.</p>
+      </section>
+    </div>
+
+    <section id="sin-eleccion" class="tarjeta" hidden>
+      <p class="volver"><a href="#">← Todas las elecciones</a></p>
+      <h1>Actas sin elección</h1>
+      <p class="suave" style="margin:0">Se tokenizaron antes de que cada acta fuera dentro de una elección. El código que acompaña a cada mesa lo escribió quien la firmó.</p>
+    </section>
+
+    <section id="actas" class="tarjeta" hidden>
+      <h2>Actas por mesa</h2>
+      <p id="actas-cuantas" class="suave"></p>
+      <p id="actas-nada" class="suave" hidden>Nadie ha tokenizado actas aquí todavía.</p>
+      <label id="actas-buscar" class="suave" hidden>Buscar mesa por su código <input id="actas-texto" type="search" autocomplete="off" maxlength="24"></label>
+      <p id="actas-sin" class="suave" hidden>Ninguna mesa tiene ese código.</p>
+      <div class="lista"></div>
+      <button id="actas-mas" type="button" hidden></button>
+    </section>
+
     <div id="mesa" hidden>
       <section class="tarjeta">
-        <p class="volver"><a href="#">← Volver</a></p>
+        <p class="volver"><a id="mesa-volver" href="#">← Volver</a></p>
         <h1 id="mesa-titulo"></h1>
         <div class="fila"><span class="etiqueta">Actas de una mesa</span><span id="mesa-cuantos" class="suave"></span></div>
         <p id="mesa-lectura"></p>
@@ -154,36 +208,14 @@ footer { margin-top: 24px; color: var(--suave); font-size: 13px; }
       <p class="suave">Que coincida dice que el archivo no cambió, no que el acta sea verdadera. No es un registro oficial ni reemplaza a Servel.</p>
     </section>
 
-    <p id="no-esta" class="tarjeta aviso" hidden>Esta votación no está en la cadena. Revisa que el enlace esté completo o mira <a href="#">todas las votaciones</a>.</p>
-
-    <div id="votacion" hidden>
-      <section class="tarjeta">
-        <p class="volver"><a href="#">← Todas las votaciones</a></p>
-        <h1 id="titulo"></h1>
-        <div class="fila">
-          <span id="modo" class="etiqueta"></span>
-          <span id="estado" class="suave"></span>
-        </div>
-      </section>
-
-      <section class="tarjeta">
-        <h2>Participación en vivo</h2>
-        <div id="cifras" class="cifras"></div>
-      </section>
-
-      <section class="tarjeta">
-        <h2>Resultado</h2>
-        <div id="resultado"></div>
-        <p id="resultado-oculto" class="suave" hidden>Es una votación secreta: el resultado por opción se muestra al cierre, recontado en tu navegador. Mientras tanto se ve cuánta gente participa, sin decir en qué bloque.</p>
-      </section>
-    </div>
+    <p id="no-esta" class="tarjeta aviso" hidden>Esta elección no está en la cadena. Revisa que el enlace esté completo o mira <a href="#">todas las elecciones</a>.</p>
 
     <section class="tarjeta verif">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 3l7 3v5c0 4.5-3 8.3-7 10-4-1.7-7-5.5-7-10V6l7-3z"/><path d="M8.5 12l2.5 2.5 4.5-5"/></svg>
       <div>
         <div id="verif-titulo"></div>
         <div id="verif-detalle" class="suave"></div>
-        <p id="verif-limite" class="suave">La firma de cada voto se revisa al entrar a su votación. Hasta entonces no se detectarían votos inventados por los 2 validadores de acuerdo.</p>
+        <p id="verif-limite" class="suave">La firma de cada voto o acta se revisa al entrar a su elección. Hasta entonces no se detectarían votos inventados por los 2 validadores de acuerdo.</p>
         <div id="todo-pedir">
           <button id="verificar-todo" type="button">Verificar toda la cadena</button>
           <p id="todo-costo" class="suave">Lo calcula tu aparato, no nuestro servidor. Toma desde medio minuto en un computador hasta varios minutos en un teléfono, y gasta batería. Lo puedes detener cuando quieras.</p>
@@ -203,7 +235,7 @@ footer { margin-top: 24px; color: var(--suave); font-size: 13px; }
         <h2>Cadena en vivo</h2>
         <span class="suave vivo" id="latido">en vivo</span>
       </div>
-      <p class="suave" style="margin-top:0">Las firmas de los validadores de cada bloque que ves aquí se revisaron en tu navegador. <span id="ayuda-marcados">Los marcados tienen transacciones de esta votación.</span> <span id="ayuda-secreta" hidden>Con una votación secreta abierta no se dice cuántas transacciones trae cada bloque ni cuál lleva un voto.</span></p>
+      <p class="suave" style="margin-top:0">Las firmas de los validadores de cada bloque que ves aquí se revisaron en tu navegador. <span id="ayuda-marcados">Los marcados tienen transacciones de esta elección.</span> <span id="ayuda-secreta" hidden>Con una elección secreta abierta no se dice cuántas transacciones trae cada bloque ni cuál lleva un voto.</span></p>
       <ol id="feed"></ol>
     </section>
   </div>
@@ -213,6 +245,6 @@ footer { margin-top: 24px; color: var(--suave); font-size: 13px; }
     Esta página no pide ni guarda datos tuyos. <a href="../privacidad/">Privacidad</a>
   </footer>
 </main>
-<script type="module" src="v/f19a67df56cbb681/observar.js"></script>
+<script type="module" src="v/b99a0efd59808c9e/observar.js"></script>
 </body>
 </html>
