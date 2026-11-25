@@ -26,9 +26,9 @@
 <main>
   <p class="marca">Mi Voto</p>
   <h1>Política de privacidad</h1>
-  <p class="fecha">Vigente desde el 24 de noviembre de 2026.</p>
-  <p>Mi Voto permite crear votaciones en grupo, votar en secreto y jugar votaciones rápidas (URFA). Cada votación queda
-    registrada en VotoChain, una cadena de bloques privada que opera Fair Play, en Chile, que responde por tus datos.
+  <p class="fecha">Vigente desde el 25 de noviembre de 2026.</p>
+  <p>Mi Voto permite crear elecciones en grupo: votar en secreto, jugar votaciones rápidas (URFA) y respaldar actas. Cada
+    una queda registrada en VotoChain, una cadena de bloques privada que opera Fair Play, en Chile, que responde por tus datos.
     Para cualquier consulta escribe a <a href="mailto:dpailahueque@fairplay-chile.cl">dpailahueque@fairplay-chile.cl</a>.</p>
 
   <h2>Sin cuentas ni datos personales</h2>
@@ -44,13 +44,14 @@
   <h2>Qué queda en VotoChain</h2>
   <ul>
     <li>El registro de tu dispositivo (su clave pública).</li>
-    <li>Las votaciones que creas: pregunta, opciones, modalidad y horario.</li>
+    <li>Las elecciones que creas: pregunta o nombre, opciones, tipo y horario.</li>
     <li>En una votación secreta, que tu dispositivo participó. <strong>Tu voto queda separado de tu dispositivo</strong>
       mediante firmas ciegas: se registra sin datos de tu teléfono. Lee abajo los límites de ese secreto.</li>
     <li>En una votación URFA (juego), cada toque, con el identificador de tu dispositivo. Son públicos a propósito: así se
       arma el ranking.</li>
-    <li>Si tokenizas un acta (desde la versión 5): el código de elección, el de mesa, los totales que escribes y la huella
-      (SHA-256) del archivo, con la clave pública de tu dispositivo. Cualquiera puede ver que los firmó el mismo
+    <li>Si tokenizas un acta (desde la versión 5): a qué elección pertenece, el código de mesa, los totales que escribes y la
+      huella (SHA-256) del archivo, con la clave pública de tu dispositivo. Hasta la versión 8, en vez de la elección iba un
+      código escrito por ti: esas actas se ven como «sin elección». Cualquiera puede ver que los firmó el mismo
       dispositivo. <strong>Mi Voto no envía la foto ni el archivo</strong>, y el token no lleva nombres ni texto libre.</li>
   </ul>
   <p>VotoChain no se puede modificar ni borrar: esa es la garantía de que nadie altera un resultado. Por eso lo que ya
@@ -74,11 +75,12 @@
 
   <h2>Qué guarda tu teléfono</h2>
   <ul>
-    <li>Las votaciones que abriste o creaste, si ya votaste en ellas y tu recibo: el código de tu voto en la
+    <li>Las elecciones que abriste o creaste y su tipo, si ya votaste en ellas y tu recibo: el código de tu voto en la
       cadena. Con ese código se puede saber qué votaste; no se lo muestres a nadie.</li>
     <li>Mientras tu voto secreto espera para salir, el voto ya firmado. Se borra cuando la red lo confirma o lo rechaza
       de forma definitiva.</li>
-    <li>Tus actas tokenizadas: sus códigos y el código del token; y las que esperan señal, ya firmadas. La foto que tomas
+    <li>Tus actas tokenizadas: su elección, su mesa y el código del token; las que esperan señal, ya firmadas; y las que la red
+      no aceptó, con el motivo. La foto que tomas
       con la app se guarda sin ubicación ni datos de la cámara en tu galería, en «Mi Voto»: es tuya, y si tu galería se
       respalda en la nube, también se respalda. Mi Voto no pide permiso para ver tus fotos ni tu ubicación: usa la cámara
       y el selector de archivos de Android.</li>
@@ -108,7 +110,8 @@
       no se envía ni se guarda.</li>
     <li>La página del observador muestra a cualquiera, sin enlace ni permiso, todas las votaciones de la cadena: su
       pregunta, opciones, horario, estado y participación, y el resultado cuando corresponde. Vale para todas, también las
-      creadas antes de este aviso. Desde la versión 4, la app lo avisa antes de publicar una votación.</li>
+      creadas antes de este aviso. De una elección de respaldo de actas muestra su nombre, su plazo y todas sus actas. Desde
+      la versión 4, la app lo avisa antes de publicar una votación.</li>
     <li>No vendemos ni compartimos datos con terceros.</li>
   </ul>
 
