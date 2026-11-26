@@ -4,101 +4,244 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Observador · Mi Voto</title>
+<!-- favicon:inicio --><link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2032%2032%22%20role%3D%22img%22%20aria-label%3D%22Mi%20Voto%22%3E%3Crect%20x%3D%225%22%20y%3D%2217%22%20width%3D%226%22%20height%3D%2210%22%20rx%3D%221.5%22%20fill%3D%22%23747C8B%22%2F%3E%3Crect%20x%3D%2213%22%20y%3D%2211%22%20width%3D%226%22%20height%3D%2216%22%20rx%3D%221.5%22%20fill%3D%22%239A6B1C%22%2F%3E%3Crect%20x%3D%2221%22%20y%3D%225%22%20width%3D%226%22%20height%3D%2222%22%20rx%3D%221.5%22%20fill%3D%22%234F6FB8%22%2F%3E%3C%2Fsvg%3E"><!-- favicon:fin -->
+<!-- presencia:inicio --><link rel="manifest" href="v/6cf3c9c20c56b656/observar.webmanifest"><meta name="theme-color" content="#FFFFFF"><meta property="og:title" content="Observador · Mi Voto"><meta property="og:description" content="Sigue en vivo las elecciones de Mi Voto y su cadena, verificadas en tu navegador."><meta property="og:image" content="https://mivoto.fairplay-chile.cl/observar/v/6cf3c9c20c56b656/compartir.png"><meta property="og:image:width" content="1200"><meta property="og:image:height" content="630"><meta name="twitter:card" content="summary_large_image"><!-- presencia:fin -->
 <meta name="description" content="Sigue en vivo las elecciones de Mi Voto y su cadena, verificadas en tu navegador.">
 <meta name="robots" content="noindex">
 <!-- Fijados al publicar: la página verifica con estos validadores y nunca adopta los que anuncie el nodo. -->
 <meta name="mivoto-nodo" content="https://votochain.fairplay-chile.cl">
 <meta name="mivoto-validadores" content="5c835b03c587d10e717695e5c93032851a5e2a95677dbdbb336a5e06f8a162d7,131628e97ee587a446d229304ff61a139305ccc05c8bbdf6ed7c54d9c958e06a">
 <style>
+/* marca:inicio, generado por marca/generar.mjs desde marca/tokens.json; no se edita a mano */
+@font-face { font-family: "Barlow Condensed"; font-weight: 600; font-display: swap; src: url("v/6cf3c9c20c56b656/BarlowCondensed-600.woff2") format("woff2"); }
+@font-face { font-family: "Barlow Condensed"; font-weight: 700; font-display: swap; src: url("v/6cf3c9c20c56b656/BarlowCondensed-700.woff2") format("woff2"); }
+@font-face { font-family: "Barlow Condensed"; font-weight: 800; font-display: swap; src: url("v/6cf3c9c20c56b656/BarlowCondensed-800.woff2") format("woff2"); }
+@font-face { font-family: "Barlow"; font-weight: 400; font-display: swap; src: url("v/6cf3c9c20c56b656/Barlow-400.woff2") format("woff2"); }
+@font-face { font-family: "Barlow"; font-weight: 500; font-display: swap; src: url("v/6cf3c9c20c56b656/Barlow-500.woff2") format("woff2"); }
+@font-face { font-family: "Barlow"; font-weight: 600; font-display: swap; src: url("v/6cf3c9c20c56b656/Barlow-600.woff2") format("woff2"); }
+@font-face { font-family: "Barlow"; font-weight: 700; font-display: swap; src: url("v/6cf3c9c20c56b656/Barlow-700.woff2") format("woff2"); }
 :root {
-  --fondo: #f6f7f9; --tarjeta: #ffffff; --texto: #161a22; --suave: #5c6472; --linea: #e3e6eb;
-  --acento: #3563f0; --acento-suave: #e9eefd; --ok: #1f8a4c; --aviso: #b26a00; --error: #c0392b;
+  --fondo: #FFFFFF;
+  --superficie: #F3F5F8;
+  --linea: #E3E7EE;
+  --pista: #E3E7EE;
+  --borde-campo: #7E8797;
+  --texto: #1B2230;
+  --texto-secundario: #3A4352;
+  --texto-suave: #5B6474;
+  --marca: #4F6FB8;
+  --marca-texto: #3F5FA8;
+  --marca-suave: #E6ECF8;
+  --sobre-marca-suave: #2E4A8F;
+  --acento: #9A6B1C;
+  --acento-suave: #F6ECD8;
+  --sobre-acento-suave: #6B4A12;
+  --neutro-opcion: #747C8B;
+  --boton: #1B2230;
+  --sobre-boton: #FFFFFF;
+  --franja-principal: #4F6FB8;
+  --exito: #1F7A4D;
+  --aviso: #8A5A00;
+  --error: #B3261E;
+  --visor: #1B2230;
+  --sobre-visor: #FFFFFF;
+  color-scheme: light;
+  --letra-display: "Barlow Condensed", sans-serif;
+  --letra-texto: "Barlow", system-ui, sans-serif;
+  --letra-mono: ui-monospace, "SF Mono", "Menlo", "Consolas", monospace;
+  --tam-cifra-xl: 72px;
+  --tam-cifra-l: 54px;
+  --tam-cifra-m: 36px;
+  --tam-titulo: 30px;
+  --tam-boton: 18px;
+  --tam-etiqueta: 15px;
+  --tam-pantalla-cifra: 8vh;
+  --tam-pantalla-titulo: 7vh;
+  --tam-pantalla-opcion: 4vh;
+  --tam-logotipo: 22px;
+  --tam-cuerpo: 17px;
+  --tam-apoyo: 15px;
+  --tam-nota: 13px;
+  --tam-pantalla-nota: 2.2vh;
+  --tam-codigo: 13px;
+  --corte-boton: 18px;
+  --corte-etiqueta: 9px;
+  --franja-boton: 8px;
+  --alto-boton: 56px;
+  --radio-tarjeta: 10px;
+  --radio-pista: 4px;
+  --alto-logo: 28px;
+  --resguardo-logo: 0.25;
+  --firma-boton: polygon(0 0, 100% 0, calc(100% - var(--corte-boton)) 100%, 0 100%);
+  --firma-etiqueta: polygon(0 0, 100% 0, calc(100% - var(--corte-etiqueta)) 100%, 0 100%);
+  --dur-latido: 2s;
+  --dur-entrada: 0.6s;
 }
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
-    --fondo: #0f1217; --tarjeta: #171b22; --texto: #e8ebf0; --suave: #9aa3b2; --linea: #262c36;
-    --acento: #7c9bff; --acento-suave: #1c2540; --ok: #4cc283; --aviso: #e0a440; --error: #ef6f61;
+    --fondo: #0F1522;
+    --superficie: #18202F;
+    --linea: #2A3446;
+    --pista: #2A3446;
+    --borde-campo: #6F7A8D;
+    --texto: #E9EDF3;
+    --texto-secundario: #C6CDD8;
+    --texto-suave: #A3ADBD;
+    --marca: #7F9BDB;
+    --marca-texto: #9DB3E6;
+    --marca-suave: #1E2A45;
+    --sobre-marca-suave: #B9C9EE;
+    --acento: #D3A45A;
+    --acento-suave: #3A2E17;
+    --sobre-acento-suave: #F0D9AE;
+    --neutro-opcion: #8C95A3;
+    --boton: #E9EDF3;
+    --sobre-boton: #0F1522;
+    --franja-principal: #4F6FB8;
+    --exito: #5CC28E;
+    --aviso: #E0A440;
+    --error: #F08A80;
+    --visor: #0F1522;
+    --sobre-visor: #E9EDF3;
+    color-scheme: dark;
   }
 }
+:root[data-theme="dark"] {
+  --fondo: #0F1522;
+  --superficie: #18202F;
+  --linea: #2A3446;
+  --pista: #2A3446;
+  --borde-campo: #6F7A8D;
+  --texto: #E9EDF3;
+  --texto-secundario: #C6CDD8;
+  --texto-suave: #A3ADBD;
+  --marca: #7F9BDB;
+  --marca-texto: #9DB3E6;
+  --marca-suave: #1E2A45;
+  --sobre-marca-suave: #B9C9EE;
+  --acento: #D3A45A;
+  --acento-suave: #3A2E17;
+  --sobre-acento-suave: #F0D9AE;
+  --neutro-opcion: #8C95A3;
+  --boton: #E9EDF3;
+  --sobre-boton: #0F1522;
+  --franja-principal: #4F6FB8;
+  --exito: #5CC28E;
+  --aviso: #E0A440;
+  --error: #F08A80;
+  --visor: #0F1522;
+  --sobre-visor: #E9EDF3;
+  color-scheme: dark;
+}
+/* marca:fin */
 * { box-sizing: border-box; }
-body { margin: 0; background: var(--fondo); color: var(--texto); font: 15px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+body { margin: 0; background: var(--fondo); color: var(--texto); font-family: var(--letra-texto); font-size: var(--tam-cuerpo); line-height: 1.5; }
 main { max-width: 760px; margin: 0 auto; padding: 20px 16px 48px; }
-header { display: flex; align-items: center; gap: 10px; color: var(--suave); font-size: 13px; margin-bottom: 16px; }
-header svg { width: 22px; height: 22px; flex: none; }
-h1 { font-size: 22px; line-height: 1.25; margin: 0 0 6px; overflow-wrap: anywhere; }
-h2 { font-size: 13px; font-weight: 600; text-transform: uppercase; letter-spacing: .04em; color: var(--suave); margin: 0 0 10px; }
-.tarjeta { background: var(--tarjeta); border: 1px solid var(--linea); border-radius: 14px; padding: 16px; margin-bottom: 12px; }
+header { display: flex; align-items: center; gap: 10px; color: var(--texto-suave); font-size: var(--tam-nota); margin-bottom: 16px; }
+/* Logo horizontal: el isotipo y el nombre, con su resguardo alrededor y nunca más bajo que --alto-logo (PB-C20). */
+.logo { display: inline-flex; align-items: center; gap: calc(var(--alto-logo) * var(--resguardo-logo)); padding: calc(var(--alto-logo) * var(--resguardo-logo)); }
+.logo svg { height: var(--alto-logo); width: auto; aspect-ratio: 1; flex: none; }
+.logotipo { font-family: var(--letra-display); font-weight: 700; font-size: var(--tam-logotipo); line-height: 1; color: var(--texto); }
+h1 { font-family: var(--letra-display); font-weight: 700; font-size: var(--tam-titulo); line-height: 1.15; margin: 0 0 6px; overflow-wrap: anywhere; }
+h2 { font-size: var(--tam-nota); font-weight: 600; text-transform: uppercase; letter-spacing: .04em; color: var(--texto-suave); margin: 0 0 10px; }
+.tarjeta { background: var(--superficie); border: 1px solid var(--linea); border-radius: 14px; padding: 16px; margin-bottom: 12px; }
 .fila { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
-.etiqueta { font-size: 12px; padding: 2px 8px; border-radius: 999px; background: var(--acento-suave); color: var(--acento); }
-.vivo::before { content: ""; display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: var(--ok); margin-right: 6px; animation: latir 2s infinite; }
+.etiqueta { font-family: var(--letra-display); font-weight: 700; font-size: var(--tam-etiqueta); letter-spacing: .06em; text-transform: uppercase; padding: 2px calc(var(--corte-etiqueta) + 8px) 2px 8px; clip-path: var(--firma-etiqueta); background: var(--marca-suave); color: var(--sobre-marca-suave); }
+.vivo::before { content: ""; display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: var(--exito); margin-right: 6px; animation: latir var(--dur-latido) infinite; }
 @keyframes latir { 50% { opacity: .3; } }
 @media (prefers-reduced-motion: reduce) { .vivo::before { animation: none; } .nuevo { animation: none !important; } }
-.suave { color: var(--suave); font-size: 13px; }
+.suave { color: var(--texto-suave); font-size: var(--tam-nota); }
 .cifras { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; }
-.cifra b { display: block; font-size: 28px; font-variant-numeric: tabular-nums; line-height: 1.2; }
-.opcion { margin: 10px 0; }
-.opcion .fila { justify-content: space-between; flex-wrap: nowrap; }
-.opcion span:first-child { overflow-wrap: anywhere; }
-.barra { height: 8px; border-radius: 4px; background: var(--linea); overflow: hidden; margin-top: 4px; }
-.barra i { display: block; height: 100%; background: var(--acento); }
+.cifra b { display: block; font-family: var(--letra-display); font-weight: 700; font-size: var(--tam-cifra-m); font-variant-numeric: tabular-nums; line-height: 1.2; }
+/* Cómputo: porcentajes grandes en la letra de las cifras y una barra del color de cada opción por su orden. */
+.computo { margin-bottom: 4px; }
+.computo button { margin-left: auto; }
+.opcion { margin: 14px 0; }
+.opcion .fila { justify-content: space-between; flex-wrap: nowrap; align-items: baseline; }
+.opcion .nombre { overflow-wrap: anywhere; font-weight: 600; }
+.opcion .nombre .etiqueta { margin-left: 8px; vertical-align: 2px; }
+.opcion .pct { font-family: var(--letra-display); font-weight: 700; font-size: var(--tam-cifra-m); font-variant-numeric: tabular-nums; line-height: 1.1; }
+.opcion > .suave { font-size: var(--tam-nota); }
+.barra { height: 12px; border-radius: var(--radio-pista); background: var(--pista); overflow: hidden; margin: 4px 0 2px; }
+.barra i { display: block; height: 100%; background: var(--marca); }
+.barra i.acento { background: var(--acento); }
+.barra i.neutro-opcion { background: var(--neutro-opcion); }
+/* Pantalla grande: solo el título y el cómputo, a la medida de un proyector 16:9, con el aviso de que no es oficial. */
+.solo-pantalla { display: none; }
+body.pantalla main { max-width: none; min-height: 100vh; box-sizing: border-box; padding: 5vh 6vw; }
+body.pantalla main > :not(#contenido), body.pantalla #contenido > :not(#votacion):not(#sello), body.pantalla .volver,
+body.pantalla .participacion { display: none; }
+body.pantalla .tarjeta { border: 0; background: none; padding: 0; }
+body.pantalla h1 { font-size: var(--tam-pantalla-titulo); }
+body.pantalla .opcion { margin: 3vh 0; }
+body.pantalla .opcion .nombre { font-size: var(--tam-pantalla-opcion); }
+body.pantalla .opcion .pct { font-size: var(--tam-pantalla-cifra); }
+body.pantalla .barra { height: 3vh; }
+body.pantalla .solo-pantalla { display: block; margin-top: 4vh; font-size: var(--tam-pantalla-nota); }
 .gana { font-weight: 600; }
-.volver { margin: 0 0 8px; font-size: 13px; }
-a { color: var(--acento); }
+.volver { margin: 0 0 8px; font-size: var(--tam-nota); }
+a { color: var(--marca-texto); }
 a.votacion { display: block; padding: 12px 0; border-top: 1px solid var(--linea); color: inherit; text-decoration: none; }
 a.votacion:first-child { border-top: 0; padding-top: 0; }
-a.votacion:hover strong, a.votacion:focus-visible strong { color: var(--acento); }
-a.votacion:focus-visible { outline: 2px solid var(--acento); outline-offset: 2px; border-radius: 4px; }
+a.votacion:hover strong, a.votacion:focus-visible strong { color: var(--marca-texto); }
+a.votacion:focus-visible { outline: 2px solid var(--marca); outline-offset: 2px; border-radius: 4px; }
 a.votacion strong { overflow-wrap: anywhere; }
 a.votacion .fila { justify-content: space-between; }
 .verif { display: flex; gap: 10px; align-items: flex-start; }
-.verif svg { width: 22px; height: 22px; flex: none; color: var(--ok); margin-top: 1px; }
-.mono { font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace; font-size: 12.5px; overflow-wrap: anywhere; }
+.verif svg { width: 22px; height: 22px; flex: none; color: var(--exito); margin-top: 1px; }
+.mono { font-family: var(--letra-mono); font-size: var(--tam-codigo); overflow-wrap: anywhere; }
 .aviso { color: var(--aviso); }
 .error { color: var(--error); }
 ol { list-style: none; margin: 0; padding: 0; }
 li.bloque { padding: 10px 0; border-top: 1px solid var(--linea); }
 li.bloque:first-child { border-top: 0; }
-li.propio { border-left: 3px solid var(--acento); padding-left: 10px; }
-li.nuevo { animation: entrar .6s ease-out; }
-@keyframes entrar { from { background: var(--acento-suave); } }
-progress { width: 100%; height: 6px; accent-color: var(--acento); }
+li.propio { border-left: 3px solid var(--marca); padding-left: 10px; }
+li.nuevo { animation: entrar var(--dur-entrada) ease-out; }
+@keyframes entrar { from { background: var(--marca-suave); } }
+progress { width: 100%; height: 6px; accent-color: var(--marca); }
 .verif p { margin: 4px 0; }
-button, label.boton { font: inherit; font-size: 13px; padding: 6px 12px; margin: 6px 0; border: 1px solid var(--linea); border-radius: 8px; background: var(--acento-suave); color: var(--acento); cursor: pointer; }
-label.boton { display: inline-block; }
+/* Botones con la firma: corte diagonal a la derecha y franja de color a la izquierda. */
+button, label.boton { display: inline-flex; align-items: center; min-height: var(--alto-boton); margin: 6px 0; padding: 0 calc(var(--corte-boton) + 16px) 0 calc(var(--franja-boton) + 14px); border: 0; clip-path: var(--firma-boton); box-shadow: inset var(--franja-boton) 0 0 var(--acento); background: var(--marca-suave); color: var(--sobre-marca-suave); font-family: var(--letra-display); font-weight: 700; font-size: var(--tam-boton); letter-spacing: .06em; text-transform: uppercase; cursor: pointer; }
+button.principal, label.boton { box-shadow: inset var(--franja-boton) 0 0 var(--franja-principal); background: var(--boton); color: var(--sobre-boton); }
+button:disabled { cursor: default; opacity: .6; }
 .oculto { position: absolute; width: 1px; height: 1px; opacity: 0; }
-#comprobar:focus-within label.boton { outline: 2px solid var(--acento); outline-offset: 2px; }
+#comprobar:focus-within label.boton, #un-set :focus-within > label.boton { clip-path: none; outline: 2px solid var(--marca); outline-offset: 2px; }
 #tipos { display: flex; flex-wrap: wrap; gap: 8px; margin: 0 0 12px; padding: 0; border: 0; }
 #tipos legend { padding: 0; margin-bottom: 6px; }
 #tipos input { position: absolute; opacity: 0; }
-#tipos span { display: inline-block; font-size: 13px; padding: 6px 12px; border: 1px solid var(--linea); border-radius: 999px; background: var(--tarjeta); cursor: pointer; }
-#tipos input:checked + span { background: var(--acento-suave); border-color: var(--acento); color: var(--acento); }
-#tipos input:focus-visible + span { outline: 2px solid var(--acento); outline-offset: 2px; }
-#actas-buscar input { display: block; width: 100%; font: inherit; font-size: 15px; padding: 8px 10px; margin: 4px 0 12px; border: 1px solid var(--linea); border-radius: 8px; background: var(--fondo); color: var(--texto); }
-#actas-buscar input:focus-visible { outline: 2px solid var(--acento); outline-offset: 1px; }
+#tipos span { display: inline-block; font-size: var(--tam-nota); padding: 6px 12px; border: 1px solid var(--linea); border-radius: 999px; background: var(--superficie); cursor: pointer; }
+#tipos input:checked + span { background: var(--marca-suave); border-color: var(--marca); color: var(--sobre-marca-suave); }
+#tipos input:focus-visible + span { outline: 2px solid var(--marca); outline-offset: 2px; }
+#actas-buscar input { display: block; width: 100%; font: inherit; font-size: var(--tam-apoyo); padding: 8px 10px; margin: 4px 0 12px; border: 1px solid var(--borde-campo); border-radius: 8px; background: var(--fondo); color: var(--texto); }
+#actas-buscar input:focus-visible { outline: 2px solid var(--marca); outline-offset: 1px; }
 table { width: 100%; border-collapse: collapse; font-variant-numeric: tabular-nums; }
 th, td { text-align: right; padding: 6px 4px; border-top: 1px solid var(--linea); }
-th { border-top: 0; font-size: 12px; font-weight: 600; color: var(--suave); }
-.ok { color: var(--ok); }
-button:focus-visible { outline: 2px solid var(--acento); outline-offset: 2px; }
-footer { margin-top: 24px; color: var(--suave); font-size: 13px; }
+th { border-top: 0; font-size: var(--tam-nota); font-weight: 600; color: var(--texto-suave); }
+.ok { color: var(--exito); }
+#set-descripcion, #set-datos, #set-lista-columnas, #set-diferencias { overflow-wrap: anywhere; }
+button:focus-visible { clip-path: none; outline: 2px solid var(--marca); outline-offset: 2px; }
+footer { margin-top: 24px; color: var(--texto-suave); font-size: var(--tam-nota); }
+.modo { display: block; margin-top: 12px; }
+#modo { font: inherit; margin-left: 6px; padding: 4px 8px; color: var(--texto); background: var(--superficie); border: 1px solid var(--borde-campo); border-radius: var(--radio-pista); }
 .sello { display: flex; gap: 12px; align-items: flex-start; }
-.sello > svg { width: 28px; height: 28px; flex: none; color: var(--suave); margin-top: 1px; }
-.sello.ok > svg { color: var(--ok); }
+.sello > svg { width: 28px; height: 28px; flex: none; color: var(--texto-suave); margin-top: 1px; }
+.sello.ok > svg { color: var(--exito); }
 .sello.aviso > svg, .sello.aviso strong { color: var(--aviso); }
 .sello.error > svg, .sello.error strong { color: var(--error); }
 .sello > div { flex: 1; min-width: 0; }
-.sello strong { font-size: 17px; }
+.sello strong { font-size: var(--tam-cuerpo); }
 .sello p { margin: 4px 0; }
-#intro h1 { font-size: 26px; margin: 4px 0 6px; }
-#intro p { margin: 0 0 16px; font-size: 15px; }
-details summary { cursor: pointer; color: var(--acento); font-size: 14px; }
-details summary:focus-visible { outline: 2px solid var(--acento); outline-offset: 2px; border-radius: 4px; }
+#intro h1 { font-size: var(--tam-titulo); margin: 4px 0 6px; }
+#intro p { margin: 0 0 16px; font-size: var(--tam-apoyo); }
+#intro .lema { font-family: var(--letra-display); font-weight: 600; font-size: var(--tam-etiqueta); color: var(--marca-texto); margin: 0 0 8px; }
+details summary { cursor: pointer; color: var(--marca-texto); font-size: var(--tam-apoyo); }
+details summary:focus-visible { outline: 2px solid var(--marca); outline-offset: 2px; border-radius: 4px; }
 .sello details { margin-top: 6px; }
-.sello details p { font-size: 14px; color: var(--suave); }
-#tecnico > summary { font-size: 15px; font-weight: 600; color: var(--texto); }
+.sello details p { font-size: var(--tam-apoyo); color: var(--texto-suave); }
+#tecnico > summary { font-size: var(--tam-apoyo); font-weight: 600; color: var(--texto); }
 #tecnico[open] > summary { margin-bottom: 12px; }
-#tecnico .verif svg { color: var(--ok); }
-li.bloque details summary { font-size: 12.5px; }
+#tecnico .verif svg { color: var(--exito); }
+li.bloque details summary { font-size: var(--tam-nota); }
 /* En una votación o una mesa, su título va antes del sello. */
 #contenido:not([hidden]) { display: flex; flex-direction: column; }
 #votacion, #mesa { display: contents; }
@@ -110,12 +253,13 @@ li.bloque details summary { font-size: 12.5px; }
 <body>
 <main>
   <header>
-    <svg viewBox="0 0 64 64" aria-hidden="true"><rect width="64" height="64" rx="14" fill="#3563f0"/><g fill="#fff"><rect x="12" y="30" width="10" height="10" rx="2.5"/><rect x="22" y="40" width="10" height="10" rx="2.5"/><rect x="32" y="30" width="10" height="10" rx="2.5" opacity=".85"/><rect x="42" y="20" width="10" height="10" rx="2.5" opacity=".7"/></g></svg>
-    <span>Mi Voto · Observador</span>
+    <span class="logo" role="img" aria-label="Mi Voto"><!-- isotipo:inicio --><svg viewBox="0 0 32 32" aria-hidden="true"><rect x="5" y="17" width="6" height="10" rx="1.5" fill="var(--neutro-opcion)"/><rect x="13" y="11" width="6" height="16" rx="1.5" fill="var(--acento)"/><rect x="21" y="5" width="6" height="22" rx="1.5" fill="var(--marca)"/></svg><!-- isotipo:fin --><span class="logotipo" aria-hidden="true">Mi Voto</span></span>
+    <span>Observador</span>
   </header>
 
   <section id="intro">
     <h1>Votaciones de Mi Voto</h1>
+    <!-- lema:inicio --><p class="lema" data-lema>Vota en secreto. Comprueba a la vista.</p><!-- lema:fin -->
     <p class="suave">Mira cómo van y cómo terminaron. Tu navegador lo comprueba todo por su cuenta: no hace falta confiar en nosotros. No es un registro oficial.</p>
   </section>
 
@@ -181,7 +325,15 @@ li.bloque details summary { font-size: 12.5px; }
           <div id="sueltas-cuantas" class="suave"></div>
         </a>
       </section>
+      <section id="sets-sueltos" class="tarjeta" hidden>
+        <a class="votacion" href="#sets">
+          <strong>Sets de datos</strong>
+          <div id="sets-sueltos-cuantos" class="suave"></div>
+        </a>
+      </section>
     </div>
+
+    <p id="set-no-esta" class="tarjeta aviso" hidden>Este set de datos no está registrado en Mi Voto. Revisa que el enlace esté completo o mira <a href="#sets">los sets de datos</a>.</p>
 
     <p id="acta-no-esta" class="tarjeta aviso" hidden>Esta acta no está registrada en Mi Voto. Revisa que el enlace esté completo o mira <a href="#">todas las votaciones</a>.</p>
 
@@ -195,14 +347,20 @@ li.bloque details summary { font-size: 12.5px; }
         </div>
       </section>
 
-      <section class="tarjeta">
+      <section class="tarjeta participacion">
         <h2>Participación</h2>
         <div id="cifras" class="cifras"></div>
       </section>
 
       <section id="seccion-resultado" class="tarjeta">
         <h2>Resultado</h2>
+        <div id="computo" class="fila computo" hidden>
+          <span id="computo-etiqueta" class="etiqueta"></span>
+          <span id="computo-contados" class="suave"></span>
+          <button id="pantalla" type="button"></button>
+        </div>
         <div id="resultado"></div>
+        <p id="pantalla-aviso" class="solo-pantalla suave"></p>
         <p id="resultado-oculto" class="suave" hidden>Es una votación secreta: el resultado se ve al cierre, contado por tu navegador. Mientras tanto se ve cuánta gente vota, sin saber qué votó cada persona.</p>
       </section>
     </div>
@@ -245,17 +403,60 @@ li.bloque details summary { font-size: 12.5px; }
       </section>
     </div>
 
+    <section id="sets-portada" class="tarjeta" hidden>
+      <p class="volver"><a href="#">← Todas las votaciones</a></p>
+      <h1>Sets de datos</h1>
+      <p class="suave" style="margin:0">Archivos de datos registrados en Mi Voto: queda a la vista su ficha y con qué reconocer el archivo, pero no el archivo. Los que son de una votación se ven dentro de ella.</p>
+    </section>
+
+    <section id="sets-lista" class="tarjeta" hidden>
+      <h2>Sets registrados</h2>
+      <p id="sets-cuantos" class="suave"></p>
+      <div class="lista"></div>
+      <button id="sets-mas" type="button" hidden></button>
+    </section>
+
+    <div id="un-set" hidden>
+      <section class="tarjeta">
+        <p class="volver"><a id="set-volver" href="#">← Volver</a></p>
+        <h1 id="set-titulo"></h1>
+        <p id="set-resumen" class="suave" style="margin:0"></p>
+        <p id="set-descripcion"></p>
+        <p id="set-oculto" class="aviso" hidden>Mi Voto ocultó aquí el texto y los totales de este set porque ofenden o traen datos de personas. Lo registrado no cambia, y el archivo se puede seguir comprobando.</p>
+      </section>
+      <section class="tarjeta">
+        <h2>Comprobar el archivo</h2>
+        <p class="suave">Elígelo y tu navegador lo lee como se registró y vuelve a calcular lo publicado. El archivo no sale de tu aparato.</p>
+        <label class="boton" for="archivo-set">Elegir el archivo</label>
+        <input id="archivo-set" type="file" class="oculto">
+        <div id="set-comprobado" aria-live="polite" hidden>
+          <p id="set-comprobado-texto"></p>
+          <ol id="set-diferencias"></ol>
+        </div>
+        <p class="suave">Mi Voto no ve el archivo: sin él, los totales son la palabra de quien lo registró. Que coincida dice que el archivo no cambió, no que los datos sean verdaderos ni estén completos. No es un registro oficial.</p>
+      </section>
+      <section id="set-columnas" class="tarjeta">
+        <h2>Columnas</h2>
+        <p class="suave">Solo se publican los totales que eligió quien lo registró.</p>
+        <ol id="set-lista-columnas"></ol>
+      </section>
+      <section class="tarjeta">
+        <h2>Ficha</h2>
+        <ol id="set-datos"></ol>
+      </section>
+    </div>
+
     <section id="comprobar" class="tarjeta" hidden>
-      <h2>¿Tienes la foto de un acta?</h2>
-      <p class="suave">Elígela y tu navegador te dice si es la misma que se registró en Mi Voto. La foto no sale de tu aparato.</p>
+      <h2>¿Tienes la foto de un acta o el archivo de un set de datos?</h2>
+      <p class="suave">Elígelo y tu navegador te dice si es el mismo que se registró en Mi Voto. El archivo no sale de tu aparato.</p>
       <label class="boton" for="archivo">Elegir foto o archivo</label>
-      <input id="archivo" type="file" accept="image/*,application/pdf" class="oculto">
+      <input id="archivo" type="file" class="oculto">
       <div id="comprobado" aria-live="polite" hidden>
         <p id="comprobado-texto"></p>
         <div id="comprobado-tokens" class="lista"></div>
         <p id="comprobado-huella" class="mono suave"></p>
       </div>
-      <p class="suave">Que coincida dice que el archivo no cambió, no que el acta sea verdadera. No es un registro oficial ni reemplaza a Servel.</p>
+      <p class="suave">Que coincida dice que el archivo no cambió, no que el acta sea verdadera ni que los datos lo sean. No es un registro oficial ni reemplaza a Servel.</p>
     </section>
 
     <p id="no-esta" class="tarjeta aviso" hidden>Esta votación no está en Mi Voto. Revisa que el enlace esté completo o mira <a href="#">todas las votaciones</a>.</p>
@@ -269,7 +470,7 @@ li.bloque details summary { font-size: 12.5px; }
           <div id="verif-detalle" class="suave"></div>
           <p id="verif-limite" class="suave">La firma de cada voto o acta se revisa al entrar a su elección. Hasta entonces no se detectarían votos inventados por los 2 validadores de acuerdo.</p>
           <div id="todo-pedir">
-            <button id="verificar-todo" type="button">Verificar toda la cadena</button>
+            <button id="verificar-todo" class="principal" type="button">Verificar toda la cadena</button>
             <p id="todo-costo" class="suave">Lo calcula tu aparato, no nuestro servidor. Toma desde medio minuto en un computador hasta varios minutos en un teléfono, y gasta batería. Lo puedes detener cuando quieras.</p>
           </div>
           <div id="todo-avance" hidden>
@@ -293,9 +494,16 @@ li.bloque details summary { font-size: 12.5px; }
 
   <footer>
     La comprobación la hace votocore —el mismo código que audita en la app— dentro de tu navegador.
-    Esta página no pide ni guarda datos tuyos. <a href="../privacidad/">Privacidad</a>
+    Esta página no pide ni guarda datos tuyos; solo recuerda el modo de color que elijas. <a href="../privacidad/">Privacidad</a>
+    <label class="modo">Modo de color
+      <select id="modo">
+        <option value="sistema">Como el sistema</option>
+        <option value="claro">Claro</option>
+        <option value="oscuro">Oscuro</option>
+      </select>
+    </label>
   </footer>
 </main>
-<script type="module" src="v/7a94106759a35637/observar.js"></script>
+<script type="module" src="v/6cf3c9c20c56b656/observar.js"></script>
 </body>
 </html>
