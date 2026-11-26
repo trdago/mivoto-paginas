@@ -81,6 +81,29 @@ th { border-top: 0; font-size: 12px; font-weight: 600; color: var(--suave); }
 .ok { color: var(--ok); }
 button:focus-visible { outline: 2px solid var(--acento); outline-offset: 2px; }
 footer { margin-top: 24px; color: var(--suave); font-size: 13px; }
+.sello { display: flex; gap: 12px; align-items: flex-start; }
+.sello > svg { width: 28px; height: 28px; flex: none; color: var(--suave); margin-top: 1px; }
+.sello.ok > svg { color: var(--ok); }
+.sello.aviso > svg, .sello.aviso strong { color: var(--aviso); }
+.sello.error > svg, .sello.error strong { color: var(--error); }
+.sello > div { flex: 1; min-width: 0; }
+.sello strong { font-size: 17px; }
+.sello p { margin: 4px 0; }
+#intro h1 { font-size: 26px; margin: 4px 0 6px; }
+#intro p { margin: 0 0 16px; font-size: 15px; }
+details summary { cursor: pointer; color: var(--acento); font-size: 14px; }
+details summary:focus-visible { outline: 2px solid var(--acento); outline-offset: 2px; border-radius: 4px; }
+.sello details { margin-top: 6px; }
+.sello details p { font-size: 14px; color: var(--suave); }
+#tecnico > summary { font-size: 15px; font-weight: 600; color: var(--texto); }
+#tecnico[open] > summary { margin-bottom: 12px; }
+#tecnico .verif svg { color: var(--ok); }
+li.bloque details summary { font-size: 12.5px; }
+/* En una votación o una mesa, su título va antes del sello. */
+#contenido:not([hidden]) { display: flex; flex-direction: column; }
+#votacion, #mesa { display: contents; }
+#contenido .cabeza, #no-esta, #acta-no-esta { order: -2; }
+#sello { order: -1; }
 [hidden] { display: none !important; }
 </style>
 </head>
@@ -91,31 +114,57 @@ footer { margin-top: 24px; color: var(--suave); font-size: 13px; }
     <span>Mi Voto · Observador</span>
   </header>
 
-  <section id="carga" class="tarjeta">
-    <h2>Abriendo la cadena en tu navegador</h2>
-    <p id="carga-texto" class="suave">Cargando el verificador…</p>
-    <progress id="carga-barra" max="1" aria-label="Abriendo la cadena"></progress>
+  <section id="intro">
+    <h1>Votaciones de Mi Voto</h1>
+    <p class="suave">Mira cómo van y cómo terminaron. Tu navegador lo comprueba todo por su cuenta: no hace falta confiar en nosotros. No es un registro oficial.</p>
   </section>
 
-  <section id="falla" class="tarjeta" hidden>
-    <p id="falla-texto" class="error"></p>
+  <section id="carga" class="tarjeta sello" role="status">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 3l7 3v5c0 4.5-3 8.3-7 10-4-1.7-7-5.5-7-10V6l7-3z"/></svg>
+    <div>
+      <strong>Comprobando en tu navegador…</strong>
+      <p id="carga-texto" class="suave">Preparando la comprobación.</p>
+      <progress id="carga-barra" max="1" aria-label="Avance de la comprobación"></progress>
+    </div>
   </section>
 
-  <p id="enlace-malo" class="tarjeta aviso" hidden>El enlace no está completo. Esto es todo lo que hay en la cadena.</p>
+  <section id="falla" class="tarjeta sello error" role="alert" hidden>
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 3l7 3v5c0 4.5-3 8.3-7 10-4-1.7-7-5.5-7-10V6l7-3z"/><path d="M9.5 9.5l5 5M14.5 9.5l-5 5"/></svg>
+    <div>
+      <strong id="falla-titulo">Algo no calza</strong>
+      <p id="falla-texto"></p>
+    </div>
+  </section>
+
+  <p id="enlace-malo" class="tarjeta aviso" hidden>El enlace no está completo. Estas son todas las votaciones.</p>
 
   <div id="contenido" hidden>
+    <section id="sello" class="tarjeta sello" role="status" aria-live="polite">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 3l7 3v5c0 4.5-3 8.3-7 10-4-1.7-7-5.5-7-10V6l7-3z"/><path id="sello-marca" d="M8.5 12l2.5 2.5 4.5-5"/></svg>
+      <div>
+        <strong id="sello-titulo"></strong>
+        <p id="sello-detalle" class="suave"></p>
+        <details>
+          <summary>¿Qué se revisó?</summary>
+          <p>Tu navegador bajó el registro público completo de Mi Voto y comprobó que nadie lo cambió: cada parte queda amarrada a la anterior, y la última lleva la firma de los 2 servidores de Mi Voto. Después volvió a contar los votos él mismo.</p>
+          <p>Al entrar a una votación revisa además la firma de cada uno de sus votos o actas. Lo que no puede saber es si quienes votaron son quienes dicen ser: eso depende de cada teléfono.</p>
+          <p>Si quieres ver cómo, abre «Cómo se comprueba», al final de la página.</p>
+        </details>
+      </div>
+    </section>
+
     <div id="portada" hidden>
       <fieldset id="tipos">
-        <legend class="suave">Tipo de elección</legend>
+        <legend class="suave">Mostrar</legend>
         <label><input type="radio" name="tipo" value="" checked><span>Todas</span></label>
-        <label><input type="radio" name="tipo" value="secreto"><span>Normales</span></label>
-        <label><input type="radio" name="tipo" value="urfa"><span>URFA</span></label>
+        <label><input type="radio" name="tipo" value="secreto"><span>Voto secreto</span></label>
+        <label><input type="radio" name="tipo" value="urfa"><span>Votos ilimitados (URFA)</span></label>
         <label><input type="radio" name="tipo" value="actas"><span>Respaldo de actas</span></label>
       </fieldset>
       <section id="en-curso" class="tarjeta">
-        <h2>En curso</h2>
+        <h2>Abiertas ahora</h2>
         <div class="lista"></div>
-        <p class="suave vacio">No hay elecciones en curso.</p>
+        <p class="suave vacio">No hay votaciones abiertas ahora.</p>
       </section>
       <section id="por-empezar" class="tarjeta">
         <h2>Por empezar</h2>
@@ -124,20 +173,21 @@ footer { margin-top: 24px; color: var(--suave); font-size: 13px; }
       <section id="cerradas" class="tarjeta">
         <h2>Cerradas</h2>
         <div class="lista"></div>
+        <button id="ver-todas" type="button" hidden></button>
       </section>
       <section id="sueltas" class="tarjeta" hidden>
         <a class="votacion" href="#actas">
-          <strong>Actas sin elección</strong>
+          <strong>Actas sin votación</strong>
           <div id="sueltas-cuantas" class="suave"></div>
         </a>
       </section>
     </div>
 
-    <p id="acta-no-esta" class="tarjeta aviso" hidden>Esta acta no está en la cadena. Revisa que el enlace esté completo o mira <a href="#">todo lo que hay</a>.</p>
+    <p id="acta-no-esta" class="tarjeta aviso" hidden>Esta acta no está registrada en Mi Voto. Revisa que el enlace esté completo o mira <a href="#">todas las votaciones</a>.</p>
 
     <div id="votacion" hidden>
-      <section class="tarjeta">
-        <p class="volver"><a href="#">← Todas las elecciones</a></p>
+      <section class="tarjeta cabeza">
+        <p class="volver"><a href="#">← Todas las votaciones</a></p>
         <h1 id="titulo"></h1>
         <div class="fila">
           <span id="modo" class="etiqueta"></span>
@@ -146,27 +196,27 @@ footer { margin-top: 24px; color: var(--suave); font-size: 13px; }
       </section>
 
       <section class="tarjeta">
-        <h2>Participación en vivo</h2>
+        <h2>Participación</h2>
         <div id="cifras" class="cifras"></div>
       </section>
 
       <section id="seccion-resultado" class="tarjeta">
         <h2>Resultado</h2>
         <div id="resultado"></div>
-        <p id="resultado-oculto" class="suave" hidden>Es una elección de voto secreto: el resultado por opción se muestra al cierre, recontado en tu navegador. Mientras tanto se ve cuánta gente participa, sin decir en qué bloque.</p>
+        <p id="resultado-oculto" class="suave" hidden>Es una votación secreta: el resultado se ve al cierre, contado por tu navegador. Mientras tanto se ve cuánta gente vota, sin saber qué votó cada persona.</p>
       </section>
     </div>
 
-    <section id="sin-eleccion" class="tarjeta" hidden>
-      <p class="volver"><a href="#">← Todas las elecciones</a></p>
-      <h1>Actas sin elección</h1>
-      <p class="suave" style="margin:0">Se tokenizaron antes de que cada acta fuera dentro de una elección. El código que acompaña a cada mesa lo escribió quien la firmó.</p>
+    <section id="sin-eleccion" class="tarjeta cabeza" hidden>
+      <p class="volver"><a href="#">← Todas las votaciones</a></p>
+      <h1>Actas sin votación</h1>
+      <p class="suave" style="margin:0">Se registraron antes de que cada acta fuera parte de una votación. El código de cada mesa lo escribió quien registró el acta.</p>
     </section>
 
     <section id="mesas" class="tarjeta" hidden>
       <h2>Actas por mesa</h2>
       <p id="actas-cuantas" class="suave"></p>
-      <p id="actas-nada" class="suave" hidden>Nadie ha tokenizado actas aquí todavía.</p>
+      <p id="actas-nada" class="suave" hidden>Nadie ha registrado actas aquí todavía.</p>
       <label id="actas-buscar" class="suave" hidden>Buscar mesa por su código <input id="actas-texto" type="search" autocomplete="off" maxlength="24"></label>
       <p id="actas-sin" class="suave" hidden>Ninguna mesa tiene ese código.</p>
       <div class="lista"></div>
@@ -174,31 +224,31 @@ footer { margin-top: 24px; color: var(--suave); font-size: 13px; }
     </section>
 
     <div id="mesa" hidden>
-      <section class="tarjeta">
+      <section class="tarjeta cabeza">
         <p class="volver"><a id="mesa-volver" href="#">← Volver</a></p>
         <h1 id="mesa-titulo"></h1>
         <div class="fila"><span class="etiqueta">Actas de una mesa</span><span id="mesa-cuantos" class="suave"></span></div>
         <p id="mesa-lectura"></p>
       </section>
       <section class="tarjeta">
-        <h2>Totales tokenizados</h2>
+        <h2>Totales registrados</h2>
         <table id="mesa-totales">
-          <thead><tr><th scope="col">Válidos</th><th scope="col">Blancos</th><th scope="col">Nulos</th><th scope="col">Suma</th><th scope="col">Tokens</th></tr></thead>
+          <thead><tr><th scope="col">Válidos</th><th scope="col">Blancos</th><th scope="col">Nulos</th><th scope="col">Suma</th><th scope="col">Veces</th></tr></thead>
           <tbody></tbody>
         </table>
-        <p class="suave">Los totales los digitó quien firmó cada token mirando el acta. La suma es válidos + blancos + nulos, para cuadrarla con el acta de papel.</p>
+        <p class="suave">Los totales los escribió quien registró el acta, mirándola. La suma es válidos + blancos + nulos, para cuadrarla con el acta de papel.</p>
       </section>
       <section class="tarjeta">
-        <h2>Tokens</h2>
+        <h2>Cada registro</h2>
         <ol id="mesa-tokens"></ol>
         <p id="mesa-mas" class="suave" hidden></p>
       </section>
     </div>
 
     <section id="comprobar" class="tarjeta" hidden>
-      <h2>Comprobar un archivo de acta</h2>
-      <p class="suave">Elige la foto o el archivo del acta. Tu navegador calcula su huella (SHA-256) y la busca en la cadena. El archivo no sale de tu aparato.</p>
-      <label class="boton" for="archivo">Elegir archivo</label>
+      <h2>¿Tienes la foto de un acta?</h2>
+      <p class="suave">Elígela y tu navegador te dice si es la misma que se registró en Mi Voto. La foto no sale de tu aparato.</p>
+      <label class="boton" for="archivo">Elegir foto o archivo</label>
       <input id="archivo" type="file" accept="image/*,application/pdf" class="oculto">
       <div id="comprobado" aria-live="polite" hidden>
         <p id="comprobado-texto"></p>
@@ -208,43 +258,44 @@ footer { margin-top: 24px; color: var(--suave); font-size: 13px; }
       <p class="suave">Que coincida dice que el archivo no cambió, no que el acta sea verdadera. No es un registro oficial ni reemplaza a Servel.</p>
     </section>
 
-    <p id="no-esta" class="tarjeta aviso" hidden>Esta elección no está en la cadena. Revisa que el enlace esté completo o mira <a href="#">todas las elecciones</a>.</p>
+    <p id="no-esta" class="tarjeta aviso" hidden>Esta votación no está en Mi Voto. Revisa que el enlace esté completo o mira <a href="#">todas las votaciones</a>.</p>
 
-    <section class="tarjeta verif">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 3l7 3v5c0 4.5-3 8.3-7 10-4-1.7-7-5.5-7-10V6l7-3z"/><path d="M8.5 12l2.5 2.5 4.5-5"/></svg>
-      <div>
-        <div id="verif-titulo"></div>
-        <div id="verif-detalle" class="suave"></div>
-        <p id="verif-limite" class="suave">La firma de cada voto o acta se revisa al entrar a su elección. Hasta entonces no se detectarían votos inventados por los 2 validadores de acuerdo.</p>
-        <div id="todo-pedir">
-          <button id="verificar-todo" type="button">Verificar toda la cadena</button>
-          <p id="todo-costo" class="suave">Lo calcula tu aparato, no nuestro servidor. Toma desde medio minuto en un computador hasta varios minutos en un teléfono, y gasta batería. Lo puedes detener cuando quieras.</p>
+    <details id="tecnico" class="tarjeta">
+      <summary>Cómo se comprueba <span class="suave">· la cadena de bloques, sus firmas y el nodo</span></summary>
+      <div class="verif">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 3l7 3v5c0 4.5-3 8.3-7 10-4-1.7-7-5.5-7-10V6l7-3z"/><path d="M8.5 12l2.5 2.5 4.5-5"/></svg>
+        <div>
+          <div id="verif-titulo"></div>
+          <div id="verif-detalle" class="suave"></div>
+          <p id="verif-limite" class="suave">La firma de cada voto o acta se revisa al entrar a su elección. Hasta entonces no se detectarían votos inventados por los 2 validadores de acuerdo.</p>
+          <div id="todo-pedir">
+            <button id="verificar-todo" type="button">Verificar toda la cadena</button>
+            <p id="todo-costo" class="suave">Lo calcula tu aparato, no nuestro servidor. Toma desde medio minuto en un computador hasta varios minutos en un teléfono, y gasta batería. Lo puedes detener cuando quieras.</p>
+          </div>
+          <div id="todo-avance" hidden>
+            <p id="todo-texto" class="suave"></p>
+            <progress id="todo-barra" max="1" value="0" aria-label="Revisando las firmas de toda la cadena"></progress>
+            <button id="detener-todo" type="button">Detener</button>
+          </div>
+          <div id="nodo" class="suave"></div>
+          <div id="nodo-distinto" class="aviso" hidden>El nodo anuncia validadores distintos de los fijados en esta página: no se adoptan y sus bloques no verifican.</div>
         </div>
-        <div id="todo-avance" hidden>
-          <p id="todo-texto" class="suave"></p>
-          <progress id="todo-barra" max="1" value="0" aria-label="Revisando las firmas de toda la cadena"></progress>
-          <button id="detener-todo" type="button">Detener</button>
-        </div>
-        <div id="nodo" class="suave"></div>
-        <div id="nodo-distinto" class="aviso" hidden>El nodo anuncia validadores distintos de los fijados en esta página: no se adoptan y sus bloques no verifican.</div>
       </div>
-    </section>
 
-    <section class="tarjeta">
-      <div class="fila" style="justify-content: space-between">
+      <div class="fila" style="justify-content: space-between; margin-top: 16px">
         <h2>Cadena en vivo</h2>
         <span class="suave vivo" id="latido">en vivo</span>
       </div>
       <p class="suave" style="margin-top:0">Las firmas de los validadores de cada bloque que ves aquí se revisaron en tu navegador. <span id="ayuda-marcados">Los marcados tienen transacciones de esta elección.</span> <span id="ayuda-secreta" hidden>Con una elección secreta abierta no se dice cuántas transacciones trae cada bloque ni cuál lleva un voto.</span></p>
       <ol id="feed"></ol>
-    </section>
+    </details>
   </div>
 
   <footer>
-    Lo que ves salió de votocore —el mismo código que audita en la app— ejecutado en tu navegador: no hace falta confiar en el nodo.
+    La comprobación la hace votocore —el mismo código que audita en la app— dentro de tu navegador.
     Esta página no pide ni guarda datos tuyos. <a href="../privacidad/">Privacidad</a>
   </footer>
 </main>
-<script type="module" src="v/2aabba6022e5d162/observar.js"></script>
+<script type="module" src="v/7a94106759a35637/observar.js"></script>
 </body>
 </html>
